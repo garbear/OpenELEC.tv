@@ -39,11 +39,24 @@ if [ -n "$PKG_URL" ]; then
   URLS="$URLS `echo $PKG_URL | sed s%GEEXBOX_SRCS%$GEEXBOX_SRCS%`"
 
   for i in $URLS; do
+    if [[ $i == *.git ]]; then
+      USE_GIT=yes
+    else
+      USE_GIT=no
+    fi
+
     SOURCE_NAME="`basename $i`"
     PACKAGE="$SOURCES/$1/$SOURCE_NAME"
     PACKAGE_MIRROR="$DISTRO_MIRROR/$PKG_NAME/$SOURCE_NAME"
-    [ "$VERBOSE" != "yes" ] && WGET_OPT=-q
-    WGET_CMD="wget --passive-ftp --no-check-certificate -c $WGET_OPT -P $SOURCES/$1"
+    if [ "$USE_GIT" = "no" ]; then
+      [ "$VERBOSE" != "yes" ] && WGET_OPT=-q
+      WGET_CMD="wget --passive-ftp --no-check-certificate -c $WGET_OPT -P $SOURCES/$1"
+    else
+      GIT_CMD="git clone $i $PACKAGE"
+      if [ -n "$PKG_BRANCH" ]; then
+        GIT_CMD="$GIT_CMD -b $PKG_BRANCH"
+      fi
+    fi
 
     NBWGET="1"
 
@@ -57,23 +70,33 @@ if [ -n "$PKG_URL" ]; then
     fi
     DL="yes"
 
-    $SCRIPTS/checkdeps get
+    if [ "$GIT" = "no" ]; then
+      $SCRIPTS/checkdeps get
+    else
+      $SCRIPTS/checkdeps git
+    fi
 
     rm -f $STAMP
 
     printf "%${BUILD_INDENT}c GET      $1\n" ' '>&$SILENT_OUT
     export BUILD_INDENT=$((${BUILD_INDENT:-1}+$BUILD_INDENT_SIZE))
 
-    until [ -f "$STAMP" ] || $WGET_CMD $i || $WGET_CMD $PACKAGE_MIRROR; do
-      NBWGET=$(($NBWGET+1))
-      if [ "$NBWGET" -gt "10" ]; then
-        echo -e "\nCant't get $1 sources : $i\n Try later !!"
-        exit 1
-      fi
-    done
+    if [ "$USE_GIT" = "no" ]; then
+      until [ -f "$STAMP" ] || $WGET_CMD $i || $WGET_CMD $PACKAGE_MIRROR; do
+        NBWGET=$(($NBWGET+1))
+        if [ "$NBWGET" -gt "10" ]; then
+          echo -e "\nCant't get $1 sources : $i\n Try later !!"
+          exit 1
+        fi
+      done
+    else
+      $GIT_CMD || exit 1
+    fi
 
     echo $i > $STAMP
-    md5sum -t $PACKAGE > $MD5SUM
+    if [ "$USE_GIT" = "no" ]; then
+      md5sum -t $PACKAGE > $MD5SUM
+    fi
 
     rm -f $BUILD_BASE*/$STAMPS_NOARCH/$1/unpack
     rm -f $BUILD_BASE*/$STAMPS_NOARCH/$1/build
