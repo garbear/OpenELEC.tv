@@ -2,6 +2,8 @@
   DISTRONAME="OpenELEC"
   if [ "$XBMC" = "master" ]; then
     DISTRONAME="${DISTRONAME}_Gotham"
+  elif [ "$XBMC" = "retroplayer" ]; then
+    DISTRONAME="${DISTRONAME}_RetroPlayer"
   fi
 
 # Welcome Message for e.g. SSH Server (up to 5 Lines)

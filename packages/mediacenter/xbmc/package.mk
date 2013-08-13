@@ -24,6 +24,8 @@ if [ "$XBMC" = "master" ]; then
   PKG_VERSION="13.alpha-df91888"
 elif [ "$XBMC" = "xbmc-aml" ]; then
   PKG_VERSION="aml-frodo-d9119f2"
+elif [ "$XBMC" = "retroplayer" ]; then
+  PKG_VERSION="retroplayer-e8c1639"
 fi
 PKG_REV="1"
 PKG_ARCH="any"
@@ -217,7 +219,7 @@ else
 fi
 
 if [ "$AIRTUNES_SUPPORT" = yes ]; then
-  if [ "$XBMC" = master ]; then
+  if [ "$XBMC" = master -o "$XBMC" = retroplayer ]; then
     PKG_BUILD_DEPENDS_TARGET="$PKG_BUILD_DEPENDS_TARGET libshairplay"
     PKG_DEPENDS="$PKG_DEPENDS libshairplay"
   else
@@ -511,7 +513,7 @@ post_makeinstall_target() {
       cp $PKG_DIR/config/advancedsettings.xml $INSTALL/usr/share/xbmc/system/
     fi
 
-  if [ "$XBMC" = master ]; then
+  if [ "$XBMC" = master -o "$XBMC" = retroplayer ]; then
     mkdir -p $INSTALL/usr/share/xbmc/system/settings
       if [ -f $PROJECT_DIR/$PROJECT/xbmc/appliance.xml ]; then
         cp $PROJECT_DIR/$PROJECT/xbmc/appliance.xml $INSTALL/usr/share/xbmc/system/settings

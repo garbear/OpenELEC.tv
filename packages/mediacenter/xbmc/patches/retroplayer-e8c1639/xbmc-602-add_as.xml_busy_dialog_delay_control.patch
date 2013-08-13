@@ -1,0 +1,76 @@
+From ecafa52ffa9e70620ebd135506c6386f41a5d765 Mon Sep 17 00:00:00 2001
+From: Stephan Raue <stephan@openelec.tv>
+Date: Fri, 2 Aug 2013 01:32:04 +0200
+Subject: [PATCH] Add as.xml busy dialog delay control
+
+---
+ xbmc/cores/dvdplayer/DVDPlayer.cpp | 2 +-
+ xbmc/cores/omxplayer/OMXPlayer.cpp | 2 +-
+ xbmc/settings/AdvancedSettings.cpp | 5 +++++
+ xbmc/settings/AdvancedSettings.h   | 1 +
+ 4 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/xbmc/cores/dvdplayer/DVDPlayer.cpp b/xbmc/cores/dvdplayer/DVDPlayer.cpp
+index 1246b9f..1867a84 100644
+--- a/xbmc/cores/dvdplayer/DVDPlayer.cpp
++++ b/xbmc/cores/dvdplayer/DVDPlayer.cpp
+@@ -478,7 +478,7 @@ bool CDVDPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options)
+ #endif
+ 
+     Create();
+-    if(!m_ready.WaitMSec(100))
++    if(!m_ready.WaitMSec(g_advancedSettings.m_videoBusyDialogDelay_ms))
+     {
+       CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+       if(dialog)
+diff --git a/xbmc/cores/omxplayer/OMXPlayer.cpp b/xbmc/cores/omxplayer/OMXPlayer.cpp
+index b3d4314..ad8c27c 100644
+--- a/xbmc/cores/omxplayer/OMXPlayer.cpp
++++ b/xbmc/cores/omxplayer/OMXPlayer.cpp
+@@ -521,7 +521,7 @@ bool COMXPlayer::OpenFile(const CFileItem &file, const CPlayerOptions &options)
+ #endif
+ 
+     Create();
+-    if(!m_ready.WaitMSec(100))
++    if(!m_ready.WaitMSec(g_advancedSettings.m_videoBusyDialogDelay_ms))
+     {
+       CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+       if(dialog)
+diff --git a/xbmc/settings/AdvancedSettings.cpp b/xbmc/settings/AdvancedSettings.cpp
+index dbda375..fc8daf2 100644
+--- a/xbmc/settings/AdvancedSettings.cpp
++++ b/xbmc/settings/AdvancedSettings.cpp
+@@ -176,6 +176,7 @@ void CAdvancedSettings::Initialize()
+   m_videoFpsDetect = 1;
+   m_videoDefaultLatency = 0.0;
+   m_videoDisableHi10pMultithreading = false;
++  m_videoBusyDialogDelay_ms = 100;
+ 
+   m_musicUseTimeSeeking = true;
+   m_musicTimeSeekForward = 10;
+@@ -671,6 +672,10 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
+     //0 = disable fps detect, 1 = only detect on timestamps with uniform spacing, 2 detect on all timestamps
+     XMLUtils::GetInt(pElement, "fpsdetect", m_videoFpsDetect, 0, 2);
+ 
++    // controls the delay, in milliseconds, until
++    // the busy dialog is shown when starting video playback.
++    XMLUtils::GetInt(pElement, "busydialogdelayms", m_videoBusyDialogDelay_ms, 0, 1000);
++
+     // Store global display latency settings
+     TiXmlElement* pVideoLatency = pElement->FirstChildElement("latency");
+     if (pVideoLatency)
+diff --git a/xbmc/settings/AdvancedSettings.h b/xbmc/settings/AdvancedSettings.h
+index a523c26..776968f 100644
+--- a/xbmc/settings/AdvancedSettings.h
++++ b/xbmc/settings/AdvancedSettings.h
+@@ -179,6 +179,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
+     bool m_DXVANoDeintProcForProgressive;
+     int  m_videoFpsDetect;
+     bool m_videoDisableHi10pMultithreading;
++    int  m_videoBusyDialogDelay_ms;
+ 
+     CStdString m_videoDefaultPlayer;
+     CStdString m_videoDefaultDVDPlayer;
+-- 
+1.7.11.msysgit.1
+
