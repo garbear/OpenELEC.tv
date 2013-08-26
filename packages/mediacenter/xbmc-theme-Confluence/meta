@@ -25,7 +25,7 @@ if [ "$XBMC" = "master" ]; then
 elif [ "$XBMC" = "xbmc-aml" ]; then
   PKG_VERSION="aml-frodo-d9119f2"
 elif [ "$XBMC" = "retroplayer" ]; then
-  PKG_VERSION="retroplayer-e24634a"
+  PKG_VERSION="retroplayer-9b24502"
 fi
 PKG_REV="1"
 PKG_ARCH="any"
