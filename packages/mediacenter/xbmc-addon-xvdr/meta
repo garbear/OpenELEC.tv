@@ -20,7 +20,7 @@
 
 PKG_NAME="xbmc-addon-xvdr"
 PKG_VERSION="frodo-acd4e14"
-if [ "$XBMC" = "master" ]; then
+if [ "$XBMC" = "master" -o "$XBMC" = "retroplayer" ]; then
   PKG_VERSION="871faab"
 fi
 PKG_REV="1"
