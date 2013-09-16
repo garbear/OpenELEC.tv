@@ -22,6 +22,8 @@ PKG_NAME="xbmc-pvr-addons"
 PKG_VERSION="frodo-910d7e7"
 if [ "$XBMC" = "master" ]; then
   PKG_VERSION="18597fd"
+elif [ "$XBMC" = "retroplayer" ]; then
+  PKG_VERSION="b84a88f"
 fi
 PKG_REV="1"
 PKG_ARCH="any"
