@@ -1,5 +1,8 @@
 # Name of the Distro to build (full name, without special characters)
   DISTRONAME="OpenELEC"
+  if [ "$XBMC" = "retroplayer" ]; then
+    DISTRONAME="${DISTRONAME}_RetroPlayer"
+  fi
 
 # short project description
   DESCRIPTION="OpenELEC is a fast and userfriendly XBMC Mediacenter distribution."

@@ -1,0 +1,25 @@
+From cca442c7146a849b442fa7b190cef8c8300caaed Mon Sep 17 00:00:00 2001
+From: Garrett Brown <garbearucla@gmail.com>
+Date: Tue, 27 May 2014 00:20:06 -0700
+Subject: [PATCH] xbmc-995.03-keymap.patch
+
+---
+ xbmc/windowing/WinEventsX11.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xbmc/windowing/WinEventsX11.cpp b/xbmc/windowing/WinEventsX11.cpp
+index fff6ad2..38e48ea 100644
+--- a/xbmc/windowing/WinEventsX11.cpp
++++ b/xbmc/windowing/WinEventsX11.cpp
+@@ -705,7 +705,7 @@ XBMCKey CWinEventsX11Imp::LookupXbmcKeySym(KeySym keysym)
+ 
+   // try ascii mappings
+   if (keysym>>8 == 0x00)
+-    return (XBMCKey)(keysym & 0xFF);
++    return (XBMCKey)tolower(keysym & 0xFF);
+ 
+   return (XBMCKey)keysym;
+ }
+-- 
+1.8.1.2
+
