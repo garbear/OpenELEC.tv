@@ -18,6 +18,9 @@
 
 PKG_NAME="xbmc"
 PKG_VERSION="13-84725b0"
+if [ "$XBMC" = "retroplayer" ]; then
+  PKG_VERSION="retroplayer-509dbd9"
+fi
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
