@@ -9783,8 +9783,8 @@ index d0775a9..6cf2a44 100644
    xbmc/interfaces/python/Makefile \
    xbmc/interfaces/python/test/Makefile"
 @@ -2668,6 +2685,7 @@ AC_SUBST(USE_DOXYGEN)
- AC_SUBST(USE_PVR_ADDONS)
  AC_SUBST(GNUTLS_ALL_LIBS)
+ AC_SUBST(HOGWEED_ALL_LIBS)
  AC_SUBST(VORBISENC_ALL_LIBS)
 +AC_SUBST(USE_SSE4)
  
