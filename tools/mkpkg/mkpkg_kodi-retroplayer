@@ -21,9 +21,9 @@
 
 PKG_NAME="kodi"
 PKG_VERSION=""
-BRANCH="master"
+BRANCH="retroplayer-15beta2"
 BRANCH_FOR_ADDONS="master"
-GIT_REPO="git://github.com/xbmc/xbmc.git"
+GIT_REPO="git://github.com/garbear/xbmc.git"
 DEST_DIR="$PKG_NAME-$BRANCH"
 
 git_clone() {
@@ -125,3 +125,30 @@ mv $PKG_NAME-$PKG_VERSION/addons/skin.confluence $PKG_NAME-theme-Confluence-$PKG
 
 package_sources $PKG_NAME-$PKG_VERSION
 package_sources $PKG_NAME-theme-Confluence-$PKG_VERSION
+
+# From http://wiki.openelec.tv/index.php?title=Compile_from_source&oldid=1883
+
+# Need to set $OPENELEC_VERSION
+. ../../config/version
+
+echo "copying tar balls to sources..."
+  if [ ! -d ../../sources/ ]; then
+     mkdir ../../sources/
+  fi
+  if [ ! -d ../../sources/$PKG_NAME/ ]; then
+     mkdir ../../sources/$PKG_NAME/
+  fi
+  if [ ! -d ../../sources/$PKG_NAME-theme-Confluence/ ]; then
+     mkdir ../../sources/$PKG_NAME-theme-Confluence/
+  fi
+  mv $PKG_NAME-$PKG_VERSION.tar.xz ../../sources/$PKG_NAME/
+  mv $PKG_NAME-theme-Confluence-$PKG_VERSION.tar.xz ../../sources/$PKG_NAME-theme-Confluence/
+
+ echo "generate md5 and url files..."
+  cd ../..
+  md5sum sources/$PKG_NAME/$PKG_NAME-$PKG_VERSION.tar.xz > sources/$PKG_NAME/$PKG_NAME-$PKG_VERSION.tar.xz.md5
+  md5sum sources/$PKG_NAME-theme-Confluence/$PKG_NAME-theme-Confluence-$PKG_VERSION.tar.xz > sources/$PKG_NAME-theme-Confluence/$PKG_NAME-theme-Confluence-$PKG_VERSION.tar.xz.md5
+  echo "http://sources.openelec.tv/5.95.2/$PKG_NAME-$PKG_VERSION.tar.xz" > sources/$PKG_NAME/$PKG_NAME-$PKG_VERSION.tar.xz.url
+  echo "http://sources.openelec.tv/5.95.2/$PKG_NAME-theme-Confluence-$PKG_VERSION.tar.xz" > sources/$PKG_NAME-theme-Confluence/$PKG_NAME-theme-Confluence-$PKG_VERSION.tar.xz.url
+  echo "Source tar balls generated for $PKG_NAME PKG_VERSION=$PKG_VERSION successfully."
+

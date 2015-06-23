@@ -1,0 +1,88 @@
+#!/bin/sh
+################################################################################
+#      This file is part of OpenELEC - http://www.openelec.tv
+#      Copyright (C) 2009-2012 Stephan Raue (stephan@openelec.tv)
+#
+#  This Program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  This Program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with OpenELEC.tv; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 51 Franklin Street, Suite 500, Boston, MA 02110, USA.
+#  http://www.gnu.org/copyleft/gpl.html
+################################################################################
+
+PKG_NAME="game.libretro"
+PKG_VERSION=""
+BRANCH="master"
+GIT_REPO="git://github.com/kodi-game/$PKG_NAME.git"
+
+git_clone() {
+  # git_clone https://repo.url branch ./target_dir [githash]
+  echo "[mkpkg] Checking out $1 ..."
+  if [ ! -d "$3" ]; then
+    git clone "$1" -b $2 "$3"
+  else
+    if [ -d "$3" ] ; then
+      cd "$3"
+      git checkout $2 >/dev/null 2>/dev/null
+      git pull
+      if [ ! -z "$4" ] ; then
+        git branch -D $4 >/dev/null 2>/dev/null
+        git checkout $4 -b $4 >/dev/null 2>/dev/null
+      fi
+      cd ..
+    fi
+  fi
+}
+
+echo "getting sources..."
+  git_clone $GIT_REPO $BRANCH $PKG_NAME.git
+
+  cd $PKG_NAME.git
+    GIT_REV=`git log -n1 --format=%h`
+  cd ..
+
+echo "copying sources..."
+  rm -rf $PKG_NAME-$GIT_REV
+  cp -R $PKG_NAME.git $PKG_NAME-$GIT_REV
+
+echo "cleaning sources..."
+  rm -rf $PKG_NAME-$GIT_REV/.git
+
+echo "packing sources..."
+  tar cvJf $PKG_NAME-$GIT_REV.tar.xz $PKG_NAME-$GIT_REV
+
+echo "remove temporary sourcedir..."
+  rm -rf $PKG_NAME-$GIT_REV
+
+
+# From http://wiki.openelec.tv/index.php?title=Compile_from_source&oldid=1883
+
+# Need to set $OPENELEC_VERSION
+. ../../config/version
+
+PKG_VERSION=$GIT_REV
+
+echo "copying tar balls to sources..."
+  if [ ! -d ../../sources/ ]; then
+     mkdir ../../sources/
+  fi
+  if [ ! -d ../../sources/$PKG_NAME/ ]; then
+     mkdir ../../sources/$PKG_NAME/
+  fi
+  mv $PKG_NAME-$PKG_VERSION.tar.xz ../../sources/$PKG_NAME/
+
+echo "generate md5 and url files..."
+  cd ../..
+  md5sum sources/$PKG_NAME/$PKG_NAME-$PKG_VERSION.tar.xz > sources/$PKG_NAME/$PKG_NAME-$PKG_VERSION.tar.xz.md5
+  echo "http://sources.openelec.tv/5.95.2/$PKG_NAME-$PKG_VERSION.tar.xz" > sources/$PKG_NAME/$PKG_NAME-$PKG_VERSION.tar.xz.url
+  echo "Source tar balls generated for $PKG_NAME PKG_VERSION=$PKG_VERSION successfully."
+
