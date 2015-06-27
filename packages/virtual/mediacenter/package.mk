@@ -64,7 +64,7 @@ if [ "$MEDIACENTER" = "kodi" ]; then
 #  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.fceu-next"
 #  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.mupen64plus"
 #  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.nestopia"
-#  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.quicknes"
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.quicknes"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET peripheral.joystick"
 
 # various PVR clients
