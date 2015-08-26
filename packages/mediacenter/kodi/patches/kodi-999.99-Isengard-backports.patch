@@ -98,33 +98,6 @@ index f3f65c5..352df29 100644
          volume = action.GetAmount() * step;
        if (volume != m_volumeLevel)
 
-From a657826315ad536ac8791413508f0645eb2d8492 Mon Sep 17 00:00:00 2001
-From: Frank Razenberg <frank@zzattack.org>
-Date: Wed, 12 Aug 2015 23:44:52 +0200
-Subject: [PATCH 06/30] [keymap] undo workaround for volume adjustment issue
-
----
- system/keymaps/joystick.Sony.PLAYSTATION(R)3.Controller.xml | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
-
-diff --git a/system/keymaps/joystick.Sony.PLAYSTATION(R)3.Controller.xml b/system/keymaps/joystick.Sony.PLAYSTATION(R)3.Controller.xml
-index e4d2d07..43aee76 100644
---- a/system/keymaps/joystick.Sony.PLAYSTATION(R)3.Controller.xml
-+++ b/system/keymaps/joystick.Sony.PLAYSTATION(R)3.Controller.xml
-@@ -93,8 +93,10 @@
-       <button id="3">ActivateWindow(PlayerControls)</button>
-       <axis id="1">AnalogSeekForward</axis>
-       <axis id="2">AnalogSeekBack</axis>
--      <axis id="3">VolumeUp</axis>
--      <axis id="4">VolumeDown</axis>
-+      <axis id="3" limit="+1">VolumeUp</axis>
-+      <axis id="3" limit="-1">VolumeDown</axis>
-+      <axis id="4" limit="+1">VolumeDown</axis>
-+      <axis id="4" limit="-1">VolumeUp</axis>
-       <axis trigger="true" rest="-32768" id="13">ScrollUp</axis>
-       <axis trigger="true" rest="-32768" id="14">ScrollDown</axis>
-       <button id="5">Up</button>
-
 From 81030f4eda4d66005807d284979cdfa8936c3ebb Mon Sep 17 00:00:00 2001
 From: Anton Fedchin <afedchin@ruswizards.com>
 Date: Mon, 3 Aug 2015 18:47:02 +0300
