@@ -1,0 +1,12 @@
+diff -Naur a/Makefile.libretro b/Makefile.libretro
+--- a/Makefile.libretro	2016-01-05 20:18:50.000000000 +0100
++++ b/Makefile.libretro	2016-01-07 09:16:32.343521451 +0100
+@@ -224,7 +224,7 @@
+ 	TARGET := $(TARGET_NAME)_libretro.so
+ 	SHARED := -shared -Wl,--no-undefined
+ 	fpic := -fPIC
+-	CC = gcc
++	CC ?= gcc
+ ifneq (,$(findstring cortexa8,$(platform)))
+ 		CFLAGS += -marm -mcpu=cortex-a8
+ 		ASFLAGS += -mcpu=cortex-a8
