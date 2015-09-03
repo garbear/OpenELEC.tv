@@ -130,6 +130,11 @@ mv $PKG_NAME-$PKG_VERSION/addons/skin.confluence $PKG_NAME-theme-Confluence-$PKG
 package_sources $PKG_NAME-$PKG_VERSION
 package_sources $PKG_NAME-theme-Confluence-$PKG_VERSION
 
+echo "[mkpkg] Updating package version..."
+  sed -i "s/PKG_VERSION=\"[a-f0-9.-]*\"/PKG_VERSION=\"$PKG_VERSION\"/" ../../packages/mediacenter/kodi/package.mk
+  sed -i "s/PKG_VERSION=\"[a-f0-9.-]*\"/PKG_VERSION=\"$PKG_VERSION\"/" ../../packages/mediacenter/kodi-theme-Confluence/package.mk
+
+
 # From http://wiki.openelec.tv/index.php?title=Compile_from_source&oldid=1883
 
 # Need to set $OPENELEC_VERSION
