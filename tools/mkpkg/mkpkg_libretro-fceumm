@@ -19,7 +19,7 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-PKG_NAME="fceumm"
+PKG_NAME="libretro-fceumm"
 PKG_VERSION=""
 BRANCH="master"
 GIT_REPO="https://github.com/libretro/libretro-fceumm.git"

@@ -19,7 +19,7 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-PKG_NAME="vba-next"
+PKG_NAME="libretro-vba-next"
 PKG_VERSION=""
 BRANCH="master"
 GIT_REPO="https://github.com/libretro/vba-next.git"

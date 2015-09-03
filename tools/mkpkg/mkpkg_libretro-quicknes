@@ -19,7 +19,7 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-PKG_NAME="quicknes"
+PKG_NAME="libretro-quicknes"
 PKG_VERSION=""
 BRANCH="master"
 GIT_REPO="https://github.com/libretro/QuickNES_Core.git"

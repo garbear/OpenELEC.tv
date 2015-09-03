@@ -19,7 +19,7 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-PKG_NAME="gambatte"
+PKG_NAME="libretro-gambatte"
 PKG_VERSION=""
 BRANCH="master"
 GIT_REPO="https://github.com/libretro/gambatte-libretro.git"
