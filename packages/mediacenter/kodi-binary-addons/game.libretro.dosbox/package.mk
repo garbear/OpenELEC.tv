@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.dosbox"
-PKG_VERSION="3257a55"
+PKG_VERSION="ebaee74"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

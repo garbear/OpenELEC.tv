@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-vba-next"
-PKG_VERSION="3694586"
+PKG_VERSION="c84e7e6"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"

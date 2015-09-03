@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-2048"
-PKG_VERSION="1ada1a1"
+PKG_VERSION="cff828d"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Public domain"

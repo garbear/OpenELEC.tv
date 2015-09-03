@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-yabause"
-PKG_VERSION="679eee6"
+PKG_VERSION="a792ab5"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"

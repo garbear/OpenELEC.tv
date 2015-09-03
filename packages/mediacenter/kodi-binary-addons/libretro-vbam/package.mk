@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-vbam"
-PKG_VERSION="beaf49c"
+PKG_VERSION="15c4f6c"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"

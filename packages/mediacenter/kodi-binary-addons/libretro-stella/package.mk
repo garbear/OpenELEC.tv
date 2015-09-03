@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-stella"
-PKG_VERSION="f74411c"
+PKG_VERSION="945ca9d"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
