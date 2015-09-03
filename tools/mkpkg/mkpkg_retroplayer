@@ -1,0 +1,64 @@
+#!/bin/sh
+################################################################################
+#      This file is part of OpenELEC - http://www.openelec.tv
+#      Copyright (C) 2009-2012 Stephan Raue (stephan@openelec.tv)
+#
+#  This Program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  This Program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with OpenELEC.tv; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 51 Franklin Street, Suite 500, Boston, MA 02110, USA.
+#  http://www.gnu.org/copyleft/gpl.html
+################################################################################
+
+./mkpkg_game.libretro
+./mkpkg_game.libretro.2048
+./mkpkg_game.libretro.beetle-bsnes
+./mkpkg_game.libretro.beetle-gba
+./mkpkg_game.libretro.beetle-pce-fast
+./mkpkg_game.libretro.bnes
+./mkpkg_game.libretro.dosbox
+./mkpkg_game.libretro.fceumm
+./mkpkg_game.libretro.gambatte
+./mkpkg_game.libretro.genplus
+./mkpkg_game.libretro.meteor
+./mkpkg_game.libretro.mgba
+./mkpkg_game.libretro.mupen64plus
+./mkpkg_game.libretro.nestopia
+./mkpkg_game.libretro.quicknes
+./mkpkg_game.libretro.stella
+./mkpkg_game.libretro.vbam
+./mkpkg_game.libretro.vba-next
+./mkpkg_game.libretro.yabause
+
+./mkpkg_libretro-2048
+./mkpkg_libretro-beetle-bsnes
+./mkpkg_libretro-beetle-gba
+./mkpkg_libretro-beetle-pce-fast
+./mkpkg_libretro-bnes
+./mkpkg_libretro-dosbox
+./mkpkg_libretro-fceumm
+./mkpkg_libretro-gambatte
+./mkpkg_libretro-genplus
+./mkpkg_libretro-meteor
+./mkpkg_libretro-mgba
+./mkpkg_libretro-mupen64plus
+./mkpkg_libretro-nestopia
+./mkpkg_libretro-quicknes
+./mkpkg_libretro-stella
+./mkpkg_libretro-vbam
+./mkpkg_libretro-vba-next
+./mkpkg_libretro-yabause
+
+./mkpkg_peripheral.joystick
+
+./mkpkg_kodi-retroplayer
+
