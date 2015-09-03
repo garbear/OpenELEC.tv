@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-meteor"
-PKG_VERSION="2f6819b"
+PKG_VERSION="6b2ac9e"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"

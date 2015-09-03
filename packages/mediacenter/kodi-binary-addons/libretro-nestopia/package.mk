@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-nestopia"
-PKG_VERSION="4ee529f"
+PKG_VERSION="39ffbde"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
