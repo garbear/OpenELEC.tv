@@ -19,7 +19,7 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-PKG_NAME="mupen64plus"
+PKG_NAME="libretro-mupen64plus"
 PKG_VERSION=""
 BRANCH="master"
 GIT_REPO="https://github.com/libretro/mupen64plus-libretro.git"

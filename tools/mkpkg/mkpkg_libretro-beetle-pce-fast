@@ -19,7 +19,7 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-PKG_NAME="beetle-pce-fast"
+PKG_NAME="libretro-beetle-pce-fast"
 PKG_VERSION=""
 BRANCH="master"
 GIT_REPO="https://github.com/libretro/beetle-pce-fast-libretro.git"

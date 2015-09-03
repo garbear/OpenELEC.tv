@@ -19,7 +19,7 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-PKG_NAME="nestopia"
+PKG_NAME="libretro-nestopia"
 PKG_VERSION=""
 BRANCH="master"
 GIT_REPO="https://github.com/libretro/nestopia.git"

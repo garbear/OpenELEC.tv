@@ -19,7 +19,7 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-PKG_NAME="yabause"
+PKG_NAME="libretro-yabause"
 PKG_VERSION=""
 BRANCH="master"
 GIT_REPO="https://github.com/libretro/yabause.git"

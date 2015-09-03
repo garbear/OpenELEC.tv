@@ -19,7 +19,7 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-PKG_NAME="mgba"
+PKG_NAME="libretro-mgba"
 PKG_VERSION=""
 BRANCH="master"
 GIT_REPO="https://github.com/libretro/mgba.git"

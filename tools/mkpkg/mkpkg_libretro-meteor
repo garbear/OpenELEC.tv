@@ -19,7 +19,7 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-PKG_NAME="meteor"
+PKG_NAME="libretro-meteor"
 PKG_VERSION=""
 BRANCH="master"
 GIT_REPO="https://github.com/libretro/meteor-libretro.git"
