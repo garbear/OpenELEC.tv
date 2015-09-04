@@ -62,5 +62,5 @@
 
 ./mkpkg_peripheral.joystick
 
-./mkpkg_kodi-retroplayer
+#./mkpkg_kodi-retroplayer
 
