@@ -16,7 +16,7 @@
 #  along with OpenELEC.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 
-PKG_NAME="quicknes"
+PKG_NAME="libretro-quicknes"
 PKG_VERSION="6d5cd08"
 PKG_REV="1"
 PKG_ARCH="any"
