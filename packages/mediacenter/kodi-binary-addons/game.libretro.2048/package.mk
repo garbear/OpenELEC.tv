@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.2048"
-PKG_VERSION="9bf3f9b"
+PKG_VERSION="2778473"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

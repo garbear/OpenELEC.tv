@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.stella"
-PKG_VERSION="56942e6"
+PKG_VERSION="5edfc97"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

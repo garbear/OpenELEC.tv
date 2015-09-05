@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.beetle-pce-fast"
-PKG_VERSION="4e3901c"
+PKG_VERSION="bbf022e"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

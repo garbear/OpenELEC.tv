@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.yabause"
-PKG_VERSION="23982b7"
+PKG_VERSION="62b5f8e"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

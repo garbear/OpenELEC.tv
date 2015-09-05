@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-quicknes"
-PKG_VERSION="6d5cd08"
+PKG_VERSION="f128b76"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
