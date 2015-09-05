@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.fceumm"
-PKG_VERSION="b602d30"
+PKG_VERSION="e546ae0"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

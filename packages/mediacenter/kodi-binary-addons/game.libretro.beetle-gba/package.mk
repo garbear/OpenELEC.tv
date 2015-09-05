@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.beetle-gba"
-PKG_VERSION="4e79e91"
+PKG_VERSION="e62683b"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

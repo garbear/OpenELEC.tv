@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-genplus"
-PKG_VERSION="6d3dd37"
+PKG_VERSION="83366e7"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Modified BSD / LGPLv2.1"

@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.meteor"
-PKG_VERSION="399300e"
+PKG_VERSION="f7cf11a"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

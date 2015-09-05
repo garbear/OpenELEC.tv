@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.nestopia"
-PKG_VERSION="94197c0"
+PKG_VERSION="adbf487"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
