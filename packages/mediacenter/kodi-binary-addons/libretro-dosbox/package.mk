@@ -31,7 +31,7 @@ PKG_LONGDESC="game.libretro.dosbox: DOSBox for Kodi"
 PKG_AUTORECONF="no"
 PKG_IS_ADDON="no"
 
-PKG_LIBNAME="dosbox_libretro"
+PKG_LIBNAME="dosbox_libretro.so"
 PKG_LIBPATH="$PKG_LIBNAME"
 PKG_LIBVAR="DOSBOX_LIB"
 
