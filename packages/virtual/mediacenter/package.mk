@@ -60,6 +60,7 @@ if [ "$MEDIACENTER" = "kodi" ]; then
 
 # libretro cores
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-2048"
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-bsnes-mercury"
   #PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-beetle-bsnes"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-beetle-gba"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-beetle-pce-fast"
@@ -81,6 +82,7 @@ if [ "$MEDIACENTER" = "kodi" ]; then
 # game add-ons
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.2048"
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.bsnes-mercury"
   #PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.beetle-bsnes"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.beetle-gba"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.beetle-pce-fast"
