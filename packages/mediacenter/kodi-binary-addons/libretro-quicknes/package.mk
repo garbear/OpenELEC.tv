@@ -32,11 +32,11 @@ PKG_AUTORECONF="no"
 PKG_IS_ADDON="no"
 
 PKG_LIBNAME="quicknes_libretro.so"
-PKG_LIBPATH="libretro/$PKG_LIBNAME"
+PKG_LIBPATH="$PKG_LIBNAME"
 PKG_LIBVAR="QUICKNES_LIB"
 
 make_target() {
-  make -C libretro
+  make
 }
 
 makeinstall_target() {
