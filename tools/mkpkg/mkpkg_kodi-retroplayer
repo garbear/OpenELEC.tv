@@ -21,7 +21,7 @@
 
 PKG_NAME="kodi"
 PKG_VERSION=""
-BRANCH="retroplayer-15.1"
+BRANCH="retroplayer-gl"
 BRANCH_FOR_ADDONS="master"
 GIT_REPO="git://github.com/garbear/xbmc.git"
 DEST_DIR="$PKG_NAME-$BRANCH"
