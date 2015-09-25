@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.bsnes-mercury"
-PKG_VERSION="8c6494c"
+PKG_VERSION="a06819c"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
