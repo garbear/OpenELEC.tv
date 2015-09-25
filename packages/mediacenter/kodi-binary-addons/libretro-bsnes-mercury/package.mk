@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-bsnes-mercury"
-PKG_VERSION="c8d0e3f"
+PKG_VERSION="523bdc5"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"

@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-beetle-bsnes"
-PKG_VERSION="85cb84d"
+PKG_VERSION="2e2d327"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"

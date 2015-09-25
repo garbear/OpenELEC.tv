@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="libretro-fceumm"
-PKG_VERSION="c2547b7"
+PKG_VERSION="6b4c419"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"

@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.mupen64plus"
-PKG_VERSION="7ba9838"
+PKG_VERSION="9c5f8b0"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
