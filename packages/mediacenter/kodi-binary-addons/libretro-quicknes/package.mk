@@ -41,7 +41,7 @@ make_target() {
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib
-  ln -sf $PKG_LIBPATH $INSTALL/usr/lib/$PKG_LIBNAME
+  cp $PKG_LIBPATH $INSTALL/usr/lib/$PKG_LIBNAME
   echo "set($PKG_LIBVAR $INSTALL/usr/lib/$PKG_LIBNAME)" > $SYSROOT_PREFIX/usr/$PKG_NAME-config.cmake
 }
 
