@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="game.libretro.bsnes-mercury"
-PKG_VERSION="8c6494c"
+PKG_VERSION="c182f42"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
@@ -26,8 +26,8 @@ PKG_URL="$DISTRO_SRC/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_DEPENDS_TARGET="toolchain kodi-platform"
 PKG_PRIORITY="optional"
 PKG_SECTION=""
-PKG_SHORTDESC="game.libretro.beetle-bsnes: Beetle bSNES for Kodi"
-PKG_LONGDESC="game.libretro.beetle-bsnes: Beetle bSNES for Kodi"
+PKG_SHORTDESC="game.libretro.bsnes-mercury: bSNES Mercury for Kodi"
+PKG_LONGDESC="game.libretro.bsnes-mercury: bSNES Mercury for Kodi"
 PKG_AUTORECONF="no"
 
 PKG_IS_ADDON="yes"
