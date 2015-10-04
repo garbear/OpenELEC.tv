@@ -24,8 +24,9 @@
 ./mkpkg_game.libretro.beetle-bsnes
 ./mkpkg_game.libretro.beetle-gba
 ./mkpkg_game.libretro.beetle-pce-fast
-./mkpkg_game.libretro.bsnes-mercury
+./mkpkg_game.libretro.bluemsx
 ./mkpkg_game.libretro.bnes
+./mkpkg_game.libretro.bsnes-mercury
 ./mkpkg_game.libretro.dosbox
 ./mkpkg_game.libretro.fceumm
 ./mkpkg_game.libretro.gambatte
@@ -44,8 +45,9 @@
 ./mkpkg_libretro-beetle-bsnes
 ./mkpkg_libretro-beetle-gba
 ./mkpkg_libretro-beetle-pce-fast
-./mkpkg_libretro-bsnes-mercury
+./mkpkg_libretro-bluemsx
 ./mkpkg_libretro-bnes
+./mkpkg_libretro-bsnes-mercury
 ./mkpkg_libretro-dosbox
 ./mkpkg_libretro-fceumm
 ./mkpkg_libretro-gambatte

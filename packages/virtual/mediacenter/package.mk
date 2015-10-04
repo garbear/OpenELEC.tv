@@ -60,11 +60,12 @@ if [ "$MEDIACENTER" = "kodi" ]; then
 
 # libretro cores
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-2048"
-  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-bsnes-mercury"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-beetle-bsnes"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-beetle-gba"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-beetle-pce-fast"
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-bluemsx"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-bnes"
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-bsnes-mercury"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-dosbox"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-fceumm"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libretro-gambatte"
@@ -82,11 +83,12 @@ if [ "$MEDIACENTER" = "kodi" ]; then
 # game add-ons
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.2048"
-  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.bsnes-mercury"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.beetle-bsnes"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.beetle-gba"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.beetle-pce-fast"
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.bluemsx"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.bnes"
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.bsnes-mercury"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.dosbox"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.fceumm"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET game.libretro.gambatte"
