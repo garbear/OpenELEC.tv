@@ -35,6 +35,7 @@
 ./mkpkg_game.libretro.mgba
 ./mkpkg_game.libretro.mupen64plus
 ./mkpkg_game.libretro.nestopia
+./mkpkg_game.libretro.pcsx-rearmed
 ./mkpkg_game.libretro.quicknes
 ./mkpkg_game.libretro.stella
 ./mkpkg_game.libretro.vbam
@@ -56,6 +57,7 @@
 ./mkpkg_libretro-mgba
 ./mkpkg_libretro-mupen64plus
 ./mkpkg_libretro-nestopia
+./mkpkg_libretro-pcsx-rearmed
 ./mkpkg_libretro-quicknes
 ./mkpkg_libretro-stella
 ./mkpkg_libretro-vbam
