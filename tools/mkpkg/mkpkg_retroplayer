@@ -31,6 +31,7 @@
 ./mkpkg_game.libretro.fceumm
 ./mkpkg_game.libretro.gambatte
 ./mkpkg_game.libretro.genplus
+./mkpkg_game.libretro.mame
 ./mkpkg_game.libretro.meteor
 ./mkpkg_game.libretro.mgba
 ./mkpkg_game.libretro.mupen64plus
@@ -53,6 +54,7 @@
 ./mkpkg_libretro-fceumm
 ./mkpkg_libretro-gambatte
 ./mkpkg_libretro-genplus
+./mkpkg_libretro-mame
 ./mkpkg_libretro-meteor
 ./mkpkg_libretro-mgba
 ./mkpkg_libretro-mupen64plus
