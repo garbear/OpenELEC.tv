@@ -1,0 +1,950 @@
+From fdbd256ac39ae3b84c648ab6c7a78e57ffd3a764 Mon Sep 17 00:00:00 2001
+From: Wolfgang Haupt <haupt.wolfgang@gmail.com>
+Date: Sat, 4 Apr 2015 00:32:22 +0200
+Subject: [PATCH 1/6] added retroplayer texture to dvdvideopicture
+
+---
+ xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h b/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h
+index e5a209d..4892c3a 100644
+--- a/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h
++++ b/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h
+@@ -50,6 +50,7 @@ struct DVDCodecAvailableType
+ namespace DXVA { class CRenderPicture; }
+ namespace VAAPI { class CVaapiRenderPicture; }
+ namespace VDPAU { class CVdpauRenderPicture; }
++class CRetroGlRenderPicture;
+ class COpenMax;
+ class COpenMaxVideo;
+ struct OpenMaxVideoBufferHolder;
+@@ -107,9 +108,12 @@ struct DVDVideoPicture
+     struct {
+       CMMALVideoBuffer *MMALBuffer;
+     };
+-
+   };
+-
++ 
++  struct {
++    CRetroGlRenderPicture *retro;
++  };
++ 
+   unsigned int iFlags;
+ 
+   double       iRepeatPicture;
+
+From a128b3455e763ab9772fc737e2be2fdd0217bc3e Mon Sep 17 00:00:00 2001
+From: Wolfgang Haupt <haupt.wolfgang@gmail.com>
+Date: Sat, 4 Apr 2015 21:50:57 +0200
+Subject: [PATCH 2/6] [retroplayer] added retrogl picture structure
+
+---
+ xbmc/cores/RetroPlayer/RetroGl.h | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+ create mode 100644 xbmc/cores/RetroPlayer/RetroGl.h
+
+diff --git a/xbmc/cores/RetroPlayer/RetroGl.h b/xbmc/cores/RetroPlayer/RetroGl.h
+new file mode 100644
+index 0000000..958baeb
+--- /dev/null
++++ b/xbmc/cores/RetroPlayer/RetroGl.h
+@@ -0,0 +1,13 @@
++#ifndef RETRO_GL
++#define RETRO_GL
++
++class CRetroGlRenderPicture
++{
++public:
++  CRetroGlRenderPicture(){}
++  int texWidth, texHeight;
++  GLuint texture[1];
++  GLuint depth[1];
++};
++
++#endif
+
+From f9c690ea9406dd30647b385cbd9803a11fc28dc7 Mon Sep 17 00:00:00 2001
+From: Wolfgang Haupt <haupt.wolfgang@gmail.com>
+Date: Sat, 4 Apr 2015 22:01:04 +0200
+Subject: [PATCH 3/6] added retrogl render method
+
+---
+ xbmc/cores/VideoRenderers/LinuxRendererGL.cpp | 173 ++++++++++++++++++++++++++
+ xbmc/cores/VideoRenderers/LinuxRendererGL.h   |  11 ++
+ xbmc/cores/VideoRenderers/RenderFormats.h     |   1 +
+ xbmc/cores/VideoRenderers/RenderManager.cpp   |   2 +
+ 4 files changed, 187 insertions(+)
+
+diff --git a/xbmc/cores/VideoRenderers/LinuxRendererGL.cpp b/xbmc/cores/VideoRenderers/LinuxRendererGL.cpp
+index aee894b..78e53f5 100644
+--- a/xbmc/cores/VideoRenderers/LinuxRendererGL.cpp
++++ b/xbmc/cores/VideoRenderers/LinuxRendererGL.cpp
+@@ -70,6 +70,12 @@ extern "C" {
+   #endif
+ #endif
+ 
++#include "cores/RetroPlayer/RetroGl.h"
++
++#ifdef HAS_GLX
++#include <GL/glx.h>
++#endif
++
+ //due to a bug on osx nvidia, using gltexsubimage2d with a pbo bound and a null pointer
+ //screws up the alpha, an offset fixes this, there might still be a problem if stride + PBO_OFFSET
+ //is a multiple of 128 and deinterlacing is on
+@@ -923,6 +929,16 @@ void CLinuxRendererGL::LoadShaders(int field)
+     CLog::Log(LOGNOTICE, "GL: Using VAAPI render method");
+     m_renderMethod = RENDER_VAAPI;
+   }
++  else if (m_format == RENDER_FMT_CVBREF)
++  {
++    CLog::Log(LOGNOTICE, "GL: Using CVBREF render method");
++    m_renderMethod = RENDER_CVREF;
++  }
++  else if (m_format == RENDER_FMT_RETROGL)
++  {
++    CLog::Log(LOGNOTICE, "GL: Using RETROGL render method");
++    m_renderMethod = RENDER_RETROGL;
++  }
+   else
+   {
+     int requestedMethod = CSettings::Get().GetInt("videoplayer.rendermethod");
+@@ -1079,6 +1095,12 @@ void CLinuxRendererGL::LoadShaders(int field)
+     m_textureCreate = &CLinuxRendererGL::CreateCVRefTexture;
+     m_textureDelete = &CLinuxRendererGL::DeleteCVRefTexture;
+   }
++  else if (m_format == RENDER_FMT_RETROGL)
++  {
++    m_textureUpload = &CLinuxRendererGL::UploadRetroTexture;
++    m_textureCreate = &CLinuxRendererGL::CreateRetroTexture;
++    m_textureDelete = &CLinuxRendererGL::DeleteRetroTexture;
++  }
+   else
+   {
+     // setup default YV12 texture handlers
+@@ -1192,6 +1214,11 @@ void CLinuxRendererGL::Render(DWORD flags, int renderBuffer)
+     RenderRGB(renderBuffer, m_currentField);
+   }
+ #endif
++  else if (m_renderMethod & RENDER_RETROGL)
++  {
++      UpdateVideoFilter();
++      RenderRetro(renderBuffer, m_currentField);
++  }
+   else
+   {
+     RenderSoftware(renderBuffer, m_currentField);
+@@ -1629,6 +1656,69 @@ void CLinuxRendererGL::RenderRGB(int index, int field)
+ #endif
+ }
+ 
++void CLinuxRendererGL::RenderRetro(int index, int field)
++{
++  YUVPLANE &plane = m_buffers[index].fields[FIELD_FULL][0];
++
++  glEnable(m_textureTarget);
++  glActiveTextureARB(GL_TEXTURE0);
++
++  glBindTexture(m_textureTarget, plane.id);
++
++  // make sure we know the correct texture size
++  GetPlaneTextureSize(plane);
++
++  // Try some clamping or wrapping
++  glTexParameteri(m_textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
++  glTexParameteri(m_textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
++
++  if (m_pVideoFilterShader)
++  {
++    GLint filter;
++    if (!m_pVideoFilterShader->GetTextureFilter(filter))
++      filter = m_scalingMethod == VS_SCALINGMETHOD_NEAREST ? GL_NEAREST : GL_LINEAR;
++
++    glTexParameteri(m_textureTarget, GL_TEXTURE_MAG_FILTER, filter);
++    glTexParameteri(m_textureTarget, GL_TEXTURE_MIN_FILTER, filter);
++    m_pVideoFilterShader->SetSourceTexture(0);
++    m_pVideoFilterShader->SetWidth(m_sourceWidth);
++    m_pVideoFilterShader->SetHeight(m_sourceHeight);
++
++    //disable non-linear stretch when a dvd menu is shown, parts of the menu are rendered through the overlay renderer
++    //having non-linear stretch on breaks the alignment
++    if (g_application.m_pPlayer->IsInMenu())
++      m_pVideoFilterShader->SetNonLinStretch(1.0);
++    else
++      m_pVideoFilterShader->SetNonLinStretch(pow(CDisplaySettings::Get().GetPixelRatio(), g_advancedSettings.m_videoNonLinStretchRatio));
++
++    m_pVideoFilterShader->Enable();
++  }
++  else
++  {
++    GLint filter = m_scalingMethod == VS_SCALINGMETHOD_NEAREST ? GL_NEAREST : GL_LINEAR;
++    glTexParameteri(m_textureTarget, GL_TEXTURE_MAG_FILTER, filter);
++    glTexParameteri(m_textureTarget, GL_TEXTURE_MIN_FILTER, filter);
++  }
++
++  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
++  VerifyGLState();
++  glBegin(GL_QUADS);
++
++  glTexCoord2f(plane.rect.x1, plane.rect.y1);  glVertex2f(m_rotatedDestCoords[3].x, m_rotatedDestCoords[3].y);
++  glTexCoord2f(plane.rect.x2, plane.rect.y1);  glVertex2f(m_rotatedDestCoords[2].x, m_rotatedDestCoords[2].y);
++  glTexCoord2f(plane.rect.x2, plane.rect.y2);  glVertex2f(m_rotatedDestCoords[1].x, m_rotatedDestCoords[1].y);
++  glTexCoord2f(plane.rect.x1, plane.rect.y2);  glVertex2f(m_rotatedDestCoords[0].x, m_rotatedDestCoords[0].y);
++
++  glEnd();
++  VerifyGLState();
++
++  if (m_pVideoFilterShader)
++    m_pVideoFilterShader->Disable();
++
++  glBindTexture (m_textureTarget, 0);
++  glDisable(m_textureTarget);
++}
++
+ void CLinuxRendererGL::RenderSoftware(int index, int field)
+ {
+   // used for textues uploaded from rgba or CVPixelBuffers.
+@@ -2572,6 +2662,82 @@ bool CLinuxRendererGL::UploadVAAPITexture(int index)
+   return true;
+ }
+ 
++void CLinuxRendererGL::DeleteRetroTexture(int index)
++{
++  YUVPLANE &plane = m_buffers[index].fields[FIELD_FULL][0];
++  //SAFE_RELEASE(m_buffers[index].retro);
++  plane.id = 0;
++}
++
++bool CLinuxRendererGL::CreateRetroTexture(int index)
++{
++  YV12Image &im     = m_buffers[index].image;
++  YUVFIELDS &fields = m_buffers[index].fields;
++  YUVPLANE  &plane  = fields[FIELD_FULL][0];
++
++  DeleteRetroTexture(index);
++
++  memset(&im    , 0, sizeof(im));
++  memset(&fields, 0, sizeof(fields));
++  im.height = m_sourceHeight;
++  im.width  = m_sourceWidth;
++
++  plane.texwidth  = im.width;
++  plane.texheight = im.height;
++
++  plane.pixpertex_x = 1;
++  plane.pixpertex_y = 1;
++
++  plane.id = 1;
++
++  return true;
++}
++
++bool CLinuxRendererGL::UploadRetroTexture(int index)
++{
++  CRetroGlRenderPicture *retro = m_buffers[index].retro;
++
++  YV12Image &im     = m_buffers[index].image;
++  YUVFIELDS &fields = m_buffers[index].fields;
++  YUVPLANE &plane = fields[FIELD_FULL][0];
++
++  if (!retro /*|| !retro->valid*/)
++  {
++    return false;
++  }
++
++  plane.id = retro->texture[0];
++
++  // in stereoscopic mode sourceRect may only
++  // be a part of the source video surface
++  plane.rect = m_sourceRect;
++
++  // clip rect
++  /*
++  if (retro->crop.x1 > plane.rect.x1)
++    plane.rect.x1 = retro->crop.x1;
++  if (retro->crop.x2 < plane.rect.x2)
++    plane.rect.x2 = retro->crop.x2;
++  if (retro->crop.y1 > plane.rect.y1)
++    plane.rect.y1 = retro->crop.y1;
++  if (retro->crop.y2 < plane.rect.y2)
++    plane.rect.y2 = retro->crop.y2;
++  */
++
++  plane.texheight = retro->texHeight;
++  plane.texwidth  = retro->texWidth;
++
++  if (m_textureTarget == GL_TEXTURE_2D)
++  {
++    plane.rect.y1 /= plane.texheight;
++    plane.rect.y2 /= plane.texheight;
++    plane.rect.x1 /= plane.texwidth;
++    plane.rect.x2 /= plane.texwidth;
++  }
++
++  return true;
++}
++
+ //********************************************************************************************************
+ // CoreVideoRef Texture creation, deletion, copying + clearing
+ //********************************************************************************************************
+@@ -3505,4 +3671,11 @@ void CLinuxRendererGL::AddProcessor(struct __CVBuffer *cvBufferRef, int index)
+ }
+ #endif
+ 
++void CLinuxRendererGL::AddProcessor(CRetroGlRenderPicture *retro, int index)
++{
++  YUVBUFFER &buf = m_buffers[index];
++  buf.retro = retro;
++}
++
++
+ #endif
+diff --git a/xbmc/cores/VideoRenderers/LinuxRendererGL.h b/xbmc/cores/VideoRenderers/LinuxRendererGL.h
+index fcdea8d..2ddafaf 100644
+--- a/xbmc/cores/VideoRenderers/LinuxRendererGL.h
++++ b/xbmc/cores/VideoRenderers/LinuxRendererGL.h
+@@ -42,6 +42,7 @@ namespace Shaders { class BaseYUV2RGBShader; }
+ namespace Shaders { class BaseVideoFilterShader; }
+ namespace VAAPI   { class CVaapiRenderPicture; }
+ namespace VDPAU   { class CVdpauRenderPicture; }
++class CRetroGlRenderPicture;
+ 
+ #undef ALIGN
+ #define ALIGN(value, alignment) (((value)+((alignment)-1))&~((alignment)-1))
+@@ -87,6 +88,7 @@ enum RenderMethod
+   RENDER_POT=0x10,
+   RENDER_VAAPI=0x20,
+   RENDER_CVREF = 0x40,
++  RENDER_RETROGL = 0x80
+ };
+ 
+ enum RenderQuality
+@@ -145,6 +147,8 @@ class CLinuxRendererGL : public CBaseRenderer
+   virtual void         AddProcessor(struct __CVBuffer *cvBufferRef, int index);
+ #endif
+ 
++  virtual void         AddProcessor(CRetroGlRenderPicture *retro, int index);
++
+   virtual void RenderUpdate(bool clear, DWORD flags = 0, DWORD alpha = 255);
+ 
+   // Feature support
+@@ -195,6 +199,10 @@ class CLinuxRendererGL : public CBaseRenderer
+   void DeleteVAAPITexture(int index);
+   bool CreateVAAPITexture(int index);
+ 
++  bool UploadRetroTexture(int index);
++  void DeleteRetroTexture(int index);
++  bool CreateRetroTexture(int index);
++
+   bool UploadCVRefTexture(int index);
+   void DeleteCVRefTexture(int index);
+   bool CreateCVRefTexture(int index);
+@@ -217,6 +225,8 @@ class CLinuxRendererGL : public CBaseRenderer
+   void RenderSoftware(int renderBuffer, int field);   // single pass s/w yuv2rgb renderer
+   void RenderRGB(int renderBuffer, int field);      // render using vdpau/vaapi hardware
+   void RenderProgressiveWeave(int renderBuffer, int field); // render using vdpau hardware
++  void RenderVAAPI(int renderBuffer, int field);      // render using vdpau hardware
++  void RenderRetro(int renderBuffer, int field);      // render using retro textures
+ 
+   struct
+   {
+@@ -283,6 +293,7 @@ class CLinuxRendererGL : public CBaseRenderer
+ #ifdef TARGET_DARWIN_OSX
+     struct __CVBuffer *cvBufferRef;
+ #endif
++    CRetroGlRenderPicture *retro;
+   };
+ 
+   typedef YUVBUFFER          YUVBUFFERS[NUM_BUFFERS];
+diff --git a/xbmc/cores/VideoRenderers/RenderFormats.h b/xbmc/cores/VideoRenderers/RenderFormats.h
+index 97634c2..769c9cc 100644
+--- a/xbmc/cores/VideoRenderers/RenderFormats.h
++++ b/xbmc/cores/VideoRenderers/RenderFormats.h
+@@ -42,6 +42,7 @@ enum ERenderFormat {
+   RENDER_FMT_MEDIACODEC,
+   RENDER_FMT_IMXMAP,
+   RENDER_FMT_MMAL,
++  RENDER_FMT_RETROGL
+ };
+ 
+ struct CRenderInfo
+diff --git a/xbmc/cores/VideoRenderers/RenderManager.cpp b/xbmc/cores/VideoRenderers/RenderManager.cpp
+index bdef5fe..d0bfee0 100644
+--- a/xbmc/cores/VideoRenderers/RenderManager.cpp
++++ b/xbmc/cores/VideoRenderers/RenderManager.cpp
+@@ -1031,6 +1031,8 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
+   else if(pic.format == RENDER_FMT_MMAL)
+     m_pRenderer->AddProcessor(pic.MMALBuffer, index);
+ #endif
++  else if(pic.format == RENDER_FMT_RETROGL)
++    m_pRenderer->AddProcessor(pic.retro, index);
+ 
+   m_pRenderer->ReleaseImage(index, false);
+ 
+
+From 54ee7319e1c5dbbc4cd513d171872c9899c58ecf Mon Sep 17 00:00:00 2001
+From: Wolfgang Haupt <haupt.wolfgang@gmail.com>
+Date: Sat, 4 Apr 2015 21:48:05 +0200
+Subject: [PATCH 4/6] [retroplayer] added callbacks for hw context reset
+
+---
+ xbmc/addons/AddonCallbacksGame.cpp | 18 ++++++++++++++++++
+ xbmc/games/addons/GameClient.cpp   | 12 ++++++++++++
+ xbmc/games/addons/GameClient.h     |  5 +++++
+ 3 files changed, 35 insertions(+)
+
+diff --git a/xbmc/addons/AddonCallbacksGame.cpp b/xbmc/addons/AddonCallbacksGame.cpp
+index b59f4a3..407aefb 100644
+--- a/xbmc/addons/AddonCallbacksGame.cpp
++++ b/xbmc/addons/AddonCallbacksGame.cpp
+@@ -204,4 +204,22 @@ void CAddonCallbacksGame::RumbleSetState(void* addonData, unsigned int port, GAM
+   // TODO
+ }
+ 
++uintptr_t CAddonCallbacksGame::HwGetCurrentFramebuffer(void* addonData)
++{
++  CRetroPlayer* retroPlayer = GetRetroPlayer(addonData, __FUNCTION__);
++  if (!retroPlayer)
++    return 0;
++
++  return retroPlayer->GetCurrentFramebuffer();
++}
++
++game_proc_address_t CAddonCallbacksGame::HwGetProcAddress(void* addonData, const char *sym)
++{
++  CRetroPlayer* retroPlayer = GetRetroPlayer(addonData, __FUNCTION__);
++  if (!retroPlayer)
++    return NULL;
++
++  return retroPlayer->GetProcAddress(sym);
++}
++
+ }; /* namespace ADDON */
+diff --git a/xbmc/games/addons/GameClient.cpp b/xbmc/games/addons/GameClient.cpp
+index e2b76d0..b6c861e 100644
+--- a/xbmc/games/addons/GameClient.cpp
++++ b/xbmc/games/addons/GameClient.cpp
+@@ -477,6 +477,8 @@ bool CGameClient::LoadGameInfo()
+   m_frameRate  = av_info.timing.fps;
+   m_sampleRate = av_info.timing.sample_rate;
+   m_region     = region;
++  m_baseWidth  = av_info.geometry.base_width;
++  m_baseHeight = av_info.geometry.base_height;
+ 
+   return true;
+ }
+@@ -984,3 +986,13 @@ const char* CGameClient::ToString(GAME_ERROR error)
+       return "unknown error";
+   }
+ }
++
++void CGameClient::HwContextReset()
++{
++    try { LogError(m_pStruct->HwContextReset(), "HwContextReset()"); }
++    catch (...) { LogException("HwContextReset()"); }
++}
++
++#ifdef TARGET_WINDOWS
++  #pragma warning (pop)
++#endif
+diff --git a/xbmc/games/addons/GameClient.h b/xbmc/games/addons/GameClient.h
+index 7a52ff9..87dbed0 100644
+--- a/xbmc/games/addons/GameClient.h
++++ b/xbmc/games/addons/GameClient.h
+@@ -113,6 +113,8 @@ class CGameClient : public ADDON::CAddonDll<DllGameClient, GameClient, game_clie
+   int                GetRegion() const     { return m_region; }
+   double             GetFrameRate() const  { return m_frameRate * m_frameRateCorrection; }
+   double             GetSampleRate() const { return m_sampleRate; }
++  unsigned int       GetBaseWidth() const  { return m_baseWidth; }
++  unsigned int       GetBaseHeight() const { return m_baseHeight; }
+ 
+   // Modify the value returned by GetFrameRate(), used to sync gameplay to audio
+   // TODO: Remove me
+@@ -142,6 +144,7 @@ class CGameClient : public ADDON::CAddonDll<DllGameClient, GameClient, game_clie
+   bool OnButtonMotion(int port, const std::string& feature, float magnitude);
+   bool OnAnalogStickMotion(int port, const std::string& feature, float x, float y);
+   bool OnAccelerometerMotion(int port, const std::string& feature, float x, float y, float z);
++  void HwContextReset();
+ 
+   // implementation of IKeyboardHandler
+   virtual bool OnKeyPress(const CKey& key) override;
+@@ -189,6 +192,8 @@ class CGameClient : public ADDON::CAddonDll<DllGameClient, GameClient, game_clie
+   double                m_frameRate;           // Video framerate
+   double                m_frameRateCorrection; // Framerate correction factor (to sync to audio)
+   double                m_sampleRate;          // Audio frequency
++  unsigned int          m_baseHeight;
++  unsigned int          m_baseWidth;
+ 
+   // Save/rewind functionality
+   bool                  m_bSerializationInited;
+
+From 78e0a8b0ed2726f4f03ed81148d43253c76c476a Mon Sep 17 00:00:00 2001
+From: Wolfgang Haupt <haupt.wolfgang@gmail.com>
+Date: Sat, 4 Apr 2015 21:41:54 +0200
+Subject: [PATCH 5/6] [retroplayer] added some new features to retroplayer
+
+---
+ xbmc/addons/AddonCallbacksGame.cpp          |  12 ---
+ xbmc/addons/include/kodi_game_types.h       |   1 +
+ xbmc/cores/RetroPlayer/RetroPlayer.cpp      | 136 ++++++++++++++++++++++++++++
+ xbmc/cores/RetroPlayer/RetroPlayer.h        |  29 +++++-
+ xbmc/cores/RetroPlayer/RetroPlayerVideo.cpp |  65 ++++++++++---
+ xbmc/cores/RetroPlayer/RetroPlayerVideo.h   |   4 +
+ 6 files changed, 221 insertions(+), 26 deletions(-)
+
+diff --git a/xbmc/addons/AddonCallbacksGame.cpp b/xbmc/addons/AddonCallbacksGame.cpp
+index 407aefb..f745e2c 100644
+--- a/xbmc/addons/AddonCallbacksGame.cpp
++++ b/xbmc/addons/AddonCallbacksGame.cpp
+@@ -165,18 +165,6 @@ void CAddonCallbacksGame::HwSetInfo(void* addonData, const game_hw_info *hw_info
+   // TODO
+ }
+ 
+-uintptr_t CAddonCallbacksGame::HwGetCurrentFramebuffer(void* addonData)
+-{
+-  // TODO
+-  return 0;
+-}
+-
+-game_proc_address_t CAddonCallbacksGame::HwGetProcAddress(void* addonData, const char *sym)
+-{
+-  // TODO
+-  return NULL;
+-}
+-
+ bool CAddonCallbacksGame::OpenPort(void* addonData, unsigned int port)
+ {
+   CGameClient* gameClient = GetGameClient(addonData, __FUNCTION__);
+diff --git a/xbmc/addons/include/kodi_game_types.h b/xbmc/addons/include/kodi_game_types.h
+index 6d48e86..37d2592 100644
+--- a/xbmc/addons/include/kodi_game_types.h
++++ b/xbmc/addons/include/kodi_game_types.h
+@@ -79,6 +79,7 @@ typedef enum GAME_RENDER_FORMAT
+   GAME_RENDER_FMT_0RGB8888,
+   GAME_RENDER_FMT_RGB565,
+   GAME_RENDER_FMT_0RGB1555,
++  GAME_RENDER_FMT_GL
+ } GAME_RENDER_FORMAT;
+ 
+ typedef enum GAME_AUDIO_FORMAT
+diff --git a/xbmc/cores/RetroPlayer/RetroPlayer.cpp b/xbmc/cores/RetroPlayer/RetroPlayer.cpp
+index 3b749b5..fc127a5 100644
+--- a/xbmc/cores/RetroPlayer/RetroPlayer.cpp
++++ b/xbmc/cores/RetroPlayer/RetroPlayer.cpp
+@@ -18,6 +18,7 @@
+  *
+  */
+ 
++#include "windowing/WindowingFactory.h"
+ #include "RetroPlayer.h"
+ #include "ApplicationMessenger.h"
+ #include "cores/dvdplayer/DVDClock.h"
+@@ -112,6 +113,7 @@ bool CRetroPlayer::OpenFile(const CFileItem& file, const CPlayerOptions& options
+   // Must be called from main thread
+   g_renderManager.PreInit();
+ 
++
+   Create();
+   CLog::Log(LOGDEBUG, "RetroPlayer: File opened successfully");
+   return true;
+@@ -195,8 +197,14 @@ void CRetroPlayer::Process()
+     CLog::Log(LOGDEBUG, "RetroPlayer: Frame rate changed from %f to %f",
+       (float)(newFramerate / m_audioSpeedFactor), (float)newFramerate);
+ 
++  CreateGlxContext();
++  CreateTexture();
++  if (!CreateFramebuffer())
++    CLog::Log(LOGINFO, "Could not create framebuffer object");
++  
+   m_video.Start(newFramerate);
+ 
++  m_gameClient->HwContextReset();
+   const double frametime = 1000 * 1000 / newFramerate; // microseconds
+ 
+   CLog::Log(LOGDEBUG, "RetroPlayer: Beginning loop de loop");
+@@ -369,3 +377,131 @@ int64_t CRetroPlayer::GetTotalTime()
+   int max_buffer = m_gameClient->GetMaxFrames();
+   return 1000 * max_buffer / m_gameClient->GetFrameRate(); // Millisecs
+ }
++
++game_proc_address_t CRetroPlayer::GetProcAddress(const char* sym)
++{
++  return glXGetProcAddress((const GLubyte*) sym);
++}
++
++bool CRetroPlayer::CreateGlxContext()
++{
++  GLXContext   glContext;
++
++  m_Display = g_Windowing.GetDisplay();
++  glContext = g_Windowing.GetGlxContext();
++  m_Window = g_Windowing.GetWindow();
++
++  // Get our window attribs.
++  XWindowAttributes wndattribs;
++  XGetWindowAttributes(m_Display, m_Window, &wndattribs);
++
++  // Get visual Info
++  XVisualInfo visInfo;
++  visInfo.visualid = wndattribs.visual->visualid;
++  int nvisuals = 0;
++  XVisualInfo* visuals = XGetVisualInfo(m_Display, VisualIDMask, &visInfo, &nvisuals);
++  if (nvisuals != 1)
++  {
++    CLog::Log(LOGERROR, "RetroPlayer::CreateGlxContext - could not find visual");
++    return false;
++  }
++  visInfo = visuals[0];
++  XFree(visuals);
++
++  m_pixmap = XCreatePixmap(m_Display,
++                           m_Window,
++                           192,
++                           108,
++                           visInfo.depth);
++  if (!m_pixmap)
++  {
++    CLog::Log(LOGERROR, "RetroPlayer::CreateGlxContext - Unable to create XPixmap");
++    return false;
++  }
++
++  // create gl pixmap
++  m_glPixmap = glXCreateGLXPixmap(m_Display, &visInfo, m_pixmap);
++
++  if (!m_glPixmap)
++  {
++    CLog::Log(LOGINFO, "RetroPlayer::CreateGlxContext - Could not create glPixmap");
++    return false;
++  }
++
++  m_glContext = glXCreateContext(m_Display, &visInfo, glContext, True);
++
++  if (!glXMakeCurrent(m_Display, m_glPixmap, m_glContext))
++  {
++    CLog::Log(LOGINFO, "RetroPlayer::CreateGlxContext - Could not make Pixmap current");
++    return false;
++  }
++
++  CLog::Log(LOGNOTICE, "RetroPlayer::CreateGlxContext - created context");
++  return true;
++}
++
++GLuint CRetroPlayer::GetCurrentFramebuffer()
++{
++  return (GLuint)m_fboId;
++}
++
++bool CRetroPlayer::CreateFramebuffer()
++{
++  glGenFramebuffers(1, &m_fboId);
++  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
++
++  // attach the texture to FBO color attachment point
++  glFramebufferTexture2D(GL_FRAMEBUFFER,          // 1. fbo target: GL_FRAMEBUFFER
++                       GL_COLOR_ATTACHMENT0,      // 2. attachment point
++                       GL_TEXTURE_2D,             // 3. tex target: GL_TEXTURE_2D
++                       m_retroglpic.texture[0],   // 4. tex ID
++                       0);                        // 5. mipmap level: 0(base){
++
++  CreateDepthbuffer();
++
++  CreateDepthbuffer();
++
++  // check FBO status
++  GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
++  if(status != GL_FRAMEBUFFER_COMPLETE)
++    return false;
++
++  return true;
++}
++
++bool CRetroPlayer::CreateTexture()
++{
++  glBindTexture(GL_TEXTURE_2D, 0);
++  glGenTextures(1, &m_retroglpic.texture[0]);
++
++  glBindTexture(GL_TEXTURE_2D, m_retroglpic.texture[0]);
++  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
++  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
++  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
++  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
++  glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // automatic mipmap
++  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_gameClient->GetBaseWidth(), m_gameClient->GetBaseHeight(), 0,
++               GL_RGB, GL_UNSIGNED_BYTE, 0);
++
++  return true;
++}
++
++bool CRetroPlayer::CreateDepthbuffer()
++{
++  glGenRenderbuffers(1, &m_retroglpic.depth[0]);
++  glBindRenderbuffer(GL_RENDERBUFFER, m_retroglpic.depth[0]);
++  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, m_gameClient->GetBaseWidth(), m_gameClient->GetBaseHeight());
++  glBindRenderbuffer(GL_RENDERBUFFER, 0);
++  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
++                            GL_RENDERBUFFER, m_retroglpic.depth[0]);
++  return true;
++}
++
++bool CRetroPlayer::VideoFrame(const uint8_t* data, unsigned int size, unsigned int width, unsigned int height, AVPixelFormat format)
++{
++  if (data == (void*)-1)
++    return m_video.VideoFrame(format, size, width, height, &m_retroglpic);
++  else
++    return m_video.VideoFrame(data, size, width, height, format);
++  return false;
++}
+diff --git a/xbmc/cores/RetroPlayer/RetroPlayer.h b/xbmc/cores/RetroPlayer/RetroPlayer.h
+index d3d7e17..3fd709c 100644
+--- a/xbmc/cores/RetroPlayer/RetroPlayer.h
++++ b/xbmc/cores/RetroPlayer/RetroPlayer.h
+@@ -19,6 +19,13 @@
+  */
+ #pragma once
+ 
++#include "system_gl.h"
++#include <X11/Xlib.h>
++#include <X11/Xutil.h>
++#define GLX_GLXEXT_PROTOTYPES
++#include <GL/glx.h>
++
++
+ #include "RetroPlayerAudio.h"
+ #include "RetroPlayerVideo.h"
+ #include "cores/IPlayer.h"
+@@ -26,6 +33,8 @@
+ #include "games/GameTypes.h"
+ #include "threads/Thread.h"
+ #include "threads/Event.h"
++#include "RetroGl.h"
++#include "addons/include/kodi_game_types.h"
+ 
+ #include <stdint.h>
+ #include <string>
+@@ -127,9 +136,12 @@ class CRetroPlayer : public IPlayer, protected CThread
+   virtual void GetSubtitleCapabilities(std::vector<int> &subCaps) { subCaps.assign(1, IPC_SUBS_ALL); }
+ 
+   // Game API
+-  void VideoFrame(const uint8_t* data, unsigned int size, unsigned int width, unsigned int height, AVPixelFormat format) { m_video.VideoFrame(data, size, width, height, format); }
++  bool VideoFrame(const uint8_t* data, unsigned int size, unsigned int width, unsigned int height, AVPixelFormat format);
+   void AudioFrames(const uint8_t* data, unsigned int size, unsigned int frames, AEDataFormat format) { m_audio.AudioFrames(data, size, frames, format); }
+ 
++  GLuint GetCurrentFramebuffer();
++  game_proc_address_t GetProcAddress(const char* sym);
++
+ protected:
+   virtual void Process();
+ 
+@@ -149,6 +161,11 @@ class CRetroPlayer : public IPlayer, protected CThread
+    */
+   void CreateAudio(double samplerate);
+ 
++  bool CreateGlxContext();
++  bool CreateFramebuffer();
++  bool CreateTexture();
++  bool CreateDepthbuffer();
++
+   CRetroPlayerVideo    m_video;
+   CRetroPlayerAudio    m_audio;
+ 
+@@ -162,4 +179,14 @@ class CRetroPlayer : public IPlayer, protected CThread
+   CCriticalSection     m_critSection; // For synchronization of Open() and Close() calls
+ 
+   unsigned int m_samplerate;
++  Display *m_Display;
++  Window m_Window;
++  GLXContext m_glContext;
++  GLXWindow m_glWindow;
++  Pixmap    m_pixmap;
++  GLXPixmap m_glPixmap;
++  GLuint m_fboId;
++  GLuint m_textureId;
++
++  CRetroGlRenderPicture m_retroglpic;
+ };
+diff --git a/xbmc/cores/RetroPlayer/RetroPlayerVideo.cpp b/xbmc/cores/RetroPlayer/RetroPlayerVideo.cpp
+index cec854f..5d2b20e 100644
+--- a/xbmc/cores/RetroPlayer/RetroPlayerVideo.cpp
++++ b/xbmc/cores/RetroPlayer/RetroPlayerVideo.cpp
+@@ -27,6 +27,8 @@
+ #include "cores/FFmpeg.h"
+ #include "threads/SingleLock.h"
+ #include "utils/log.h"
++#include "system_gl.h"
++#include "cores/RetroPlayer/RetroGl.h"
+ 
+ #include "libswscale/swscale.h"
+ 
+@@ -39,7 +41,8 @@ CRetroPlayerVideo::CRetroPlayerVideo(void)
+     m_format(AV_PIX_FMT_NONE),
+     m_picture(NULL),
+     m_swsContext(NULL),
+-    m_bFrameReady(false)
++    m_bFrameReady(false),
++    m_renderpic(NULL)
+ {
+ }
+ 
+@@ -92,6 +95,29 @@ bool CRetroPlayerVideo::VideoFrame(const uint8_t* data, unsigned int size, unsig
+   return false;
+ }
+ 
++bool CRetroPlayerVideo::VideoFrame(AVPixelFormat format, unsigned int size, unsigned int width, unsigned int height, CRetroGlRenderPicture* picture)
++{
++  if (!m_bStop && !IsFrameReady())
++  {
++    m_renderpic = picture;
++    m_renderpic->texWidth = width;
++    m_renderpic->texHeight = height;
++
++    if (Configure(width, height, format))
++    {
++      ColorspaceConversion(0, size, width, height, *m_picture);
++      SetFrameReady(true);
++      return true;
++    }
++    else
++    {
++      Stop();
++    }
++  }
++
++  return false;
++}
++
+ void CRetroPlayerVideo::Process(void)
+ {
+   while (!m_bStop)
+@@ -144,8 +170,15 @@ bool CRetroPlayerVideo::Configure(unsigned int width, unsigned int height, AVPix
+ 
+     int orientation = 0; // (90 = 5, 180 = 2, 270 = 7), if we ever want to use RETRO_ENVIRONMENT_SET_ROTATION
+ 
++    ERenderFormat render_format;
++    if (m_renderpic)
++      render_format         = RENDER_FMT_RETROGL;
++    else
++      render_format         = RENDER_FMT_YUV420P; // PIX_FMT_YUV420P
++
++
+     if (!g_renderManager.Configure(width, height, width, height, (float)m_framerate,
+-                                   flags, RENDER_FMT_YUV420P, 0, orientation))
++                                   flags, render_format, 0, orientation))
+     {
+       CLog::Log(LOGERROR, "RetroPlayerVideo: Failed to configure renderer");
+       return false;
+@@ -158,38 +191,44 @@ bool CRetroPlayerVideo::Configure(unsigned int width, unsigned int height, AVPix
+                                   SWS_FAST_BILINEAR | SwScaleCPUFlags(),
+                                   NULL, NULL, NULL);
+ 
++
+     m_picture = CDVDCodecUtils::AllocatePicture(width, height);
+ 
+     m_picture->dts            = DVD_NOPTS_VALUE;
+     m_picture->pts            = DVD_NOPTS_VALUE;
+-    m_picture->format         = RENDER_FMT_YUV420P; // PIX_FMT_YUV420P
++    m_picture->format         = render_format;
+     m_picture->color_range    = 0; // *not* CONF_FLAGS_YUV_FULLRANGE
+     m_picture->color_matrix   = 4; // CONF_FLAGS_YUVCOEF_BT601
+     m_picture->iFlags         = DVP_FLAG_ALLOCATED;
+     m_picture->iDisplayWidth  = width;
+     m_picture->iDisplayHeight = height;
+     m_picture->iDuration      = 1.0 / m_framerate;
+-
+     m_format = format;
+   }
+ 
++  if (m_renderpic)
++      m_picture->retro = m_renderpic;
++
+   return true;
+ }
+ 
+ void CRetroPlayerVideo::ColorspaceConversion(const uint8_t* data, unsigned int size, unsigned int width, unsigned int height, DVDVideoPicture &output)
+ {
+-  const unsigned int stride = size / height;
+-
+-  if (stride != 0)
++  if (!m_renderpic && data)
+   {
+-    uint8_t* dataMutable = const_cast<uint8_t*>(data);
++    const unsigned int stride = size / height;
+ 
+-    uint8_t* src[] =       { dataMutable,         0,                   0,                   0 };
+-    int      srcStride[] = { (int)stride,         0,                   0,                   0 };
+-    uint8_t* dst[] =       { output.data[0],      output.data[1],      output.data[2],      0 };
+-    int      dstStride[] = { output.iLineSize[0], output.iLineSize[1], output.iLineSize[2], 0 };
++    if (stride != 0)
++    {
++      uint8_t* dataMutable = const_cast<uint8_t*>(data);
++
++      uint8_t* src[] =       { dataMutable,         0,                   0,                   0 };
++      int      srcStride[] = { (int)stride,         0,                   0,                   0 };
++      uint8_t* dst[] =       { output.data[0],      output.data[1],      output.data[2],      0 };
++      int      dstStride[] = { output.iLineSize[0], output.iLineSize[1], output.iLineSize[2], 0 };
+ 
+-    sws_scale(m_swsContext, src, srcStride, 0, height, dst, dstStride);
++      sws_scale(m_swsContext, src, srcStride, 0, height, dst, dstStride);
++    }
+   }
+ }
+ 
+diff --git a/xbmc/cores/RetroPlayer/RetroPlayerVideo.h b/xbmc/cores/RetroPlayer/RetroPlayerVideo.h
+index b272976..f0c48ba 100644
+--- a/xbmc/cores/RetroPlayer/RetroPlayerVideo.h
++++ b/xbmc/cores/RetroPlayer/RetroPlayerVideo.h
+@@ -27,6 +27,7 @@
+ 
+ struct DVDVideoPicture;
+ struct SwsContext;
++struct CRetroGlRenderPicture;
+ 
+ class CRetroPlayerVideo : protected CThread
+ {
+@@ -38,6 +39,7 @@ class CRetroPlayerVideo : protected CThread
+   void Stop(void);
+ 
+   bool VideoFrame(const uint8_t* data, unsigned int size, unsigned int width, unsigned int height, AVPixelFormat format);
++  bool VideoFrame(AVPixelFormat format, unsigned int size, unsigned int width, unsigned int height, CRetroGlRenderPicture* picture);
+ 
+ protected:
+   virtual void Process(void);
+@@ -59,4 +61,6 @@ class CRetroPlayerVideo : protected CThread
+   bool              m_bFrameReady;
+   CCriticalSection  m_frameReadyMutex;
+   CEvent            m_frameReadyEvent;
++
++  CRetroGlRenderPicture  *m_renderpic;
+ };
+
+From ead684859eb75c3e2454b3f182af9a968ed309d7 Mon Sep 17 00:00:00 2001
+From: Wolfgang Haupt <haupt.wolfgang@gmail.com>
+Date: Sat, 25 Jul 2015 15:06:15 +0200
+Subject: [PATCH 6/6] fixed compiler error in json-rpc code
+
+---
+ xbmc/interfaces/json-rpc/PlayerOperations.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/xbmc/interfaces/json-rpc/PlayerOperations.cpp b/xbmc/interfaces/json-rpc/PlayerOperations.cpp
+index 86d9965..ccc0c47 100644
+--- a/xbmc/interfaces/json-rpc/PlayerOperations.cpp
++++ b/xbmc/interfaces/json-rpc/PlayerOperations.cpp
+@@ -1054,14 +1054,14 @@ PlayerType CPlayerOperations::GetPlayer(const CVariant &player)
+       break;
+ 
+     default:
+-      playerID = None;
++      playerID = (PlayerType)None;
+       break;
+   }
+ 
+   if (GetPlaylist(playerID) == iPlayer)
+     return playerID;
+   else
+-    return None;
++    return (PlayerType)None;
+ }
+ 
+ int CPlayerOperations::GetPlaylist(PlayerType player)
