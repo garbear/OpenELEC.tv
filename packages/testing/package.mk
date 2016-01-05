@@ -31,3 +31,40 @@ PKG_LONGDESC="testing: Metapackage for various packages to test while developing
 
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
+
+PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET \
+  game.libretro \
+  game.libretro.2048 \
+  game.libretro.4do \
+  game.libretro.beetle-bsnes \
+  game.libretro.beetle-gba \
+  game.libretro.beetle-pce-fast \
+  game.libretro.beetle-psx \
+  game.libretro.bluemsx \
+  game.libretro.bnes \
+  game.libretro.bsnes-mercury-accuracy \
+  game.libretro.bsnes-mercury-balanced \
+  game.libretro.bsnes-mercury-performance \
+  game.libretro.desmume \
+  game.libretro.dosbox \
+  game.libretro.fceumm \
+  game.libretro.gambatte \
+  game.libretro.genplus \
+  game.libretro.mame \
+  game.libretro.meteor \
+  game.libretro.mgba \
+  game.libretro.mupen64plus \
+  game.libretro.nestopia \
+  game.libretro.pcsx-rearmed \
+  game.libretro.prosystem \
+  game.libretro.quicknes \
+  game.libretro.reicast \
+  game.libretro.snes9x \
+  game.libretro.snes9x-next \
+  game.libretro.stella \
+  game.libretro.vbam \
+  game.libretro.vba-next \
+  game.libretro.virtualjaguar \
+  game.libretro.yabause \
+  peripheral.joystick \
+  peripheral.steamcontroller"
