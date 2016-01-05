@@ -285,6 +285,24 @@ PKG_CONFIGURE_OPTS_TARGET="gl_cv_func_gettimeofday_clobber=no \
                            $KODI_CODEC \
                            $KODI_PLAYER"
 
+if [ "$RETROPLAYER_SUPPORT" = yes ]; then
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET kodi-game-controllers"
+
+  pre_patch() {
+    PATCHES="kodi_garbear-retroplayer-15.2.patch"
+    [ ! "$OPENGL" = "no" ] && PATCHES="$PATCHES kodi_garbear-retroplayer-gl.patch"
+    echo $PATCHES
+    for i in $PATCHES; do
+      PATCH="$PKG_DIR/patches/$i"
+      printf "%${BUILD_INDENT}c ${boldgreen}APPLY PATCH${endcolor} ${boldwhite}${PATCH_DESC}${endcolor}   $PATCH\n" ' '>&$SILENT_OUT
+      if [ -n "$(grep -E '^GIT binary patch$' $PATCH)" ]; then
+        cat $PATCH | git apply --directory=`echo "$PKG_BUILD" | cut -f1 -d\ ` -p1 --verbose --whitespace=nowarn >&$VERBOSE_OUT
+      else
+        cat $PATCH | patch -d `echo "$PKG_BUILD" | cut -f1 -d\ ` -p1 >&$VERBOSE_OUT
+      fi
+    done
+  }
+fi
 pre_configure_host() {
 # kodi fails to build in subdirs
   cd $ROOT/$PKG_BUILD

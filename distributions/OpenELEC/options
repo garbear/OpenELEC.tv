@@ -20,6 +20,9 @@
 # Mediacenter to use (kodi / no)
   MEDIACENTER="kodi"
 
+# Retroplayer support (yes / no)
+  RETROPLAYER_SUPPORT="yes"
+
 # Skins to install (Confluence)
 # Space separated list is supported,
 # e.g. SKINS="Confluence"

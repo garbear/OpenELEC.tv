@@ -32,6 +32,13 @@ PKG_LONGDESC="Kodi Media Center (which was formerly named Xbox Media Center and 
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
+if [ "$RETROPLAYER_SUPPORT" = yes ]; then
+  pre_patch() {
+    printf "%${BUILD_INDENT}c ${boldgreen}APPLY PATCH${endcolor} ${boldwhite}${PATCH_DESC}${endcolor}   kodi-theme-Confluence_garbear-retroplayer-15.2.patch\n" ' '>&$SILENT_OUT
+    cat $PKG_DIR/patches/kodi-theme-Confluence_garbear-retroplayer-15.2.patch | git apply --directory=`echo "$PKG_BUILD" | cut -f1 -d\ ` -p3 --verbose --whitespace=nowarn >&$VERBOSE_OUT
+  }
+fi
+
 make_target() {
   TexturePacker -input media/ \
                 -output Textures.xbt \
