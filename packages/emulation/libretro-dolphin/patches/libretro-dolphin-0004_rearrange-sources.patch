@@ -1,0 +1,124 @@
+diff -Naur a/libretro/Makefile.common b/libretro/Makefile.common
+--- a/libretro/Makefile.common	2016-01-07 01:05:03.583054684 +0100
++++ b/libretro/Makefile.common	2016-01-07 01:33:10.637131935 +0100
+@@ -340,6 +340,59 @@
+ 
+ #SOURCES_CXX += $(COREDIR)/VideoCommon/AVIDump.cpp
+ 
++SOURCES_CXX += $(COREDIR)/Core/PowerPC/PowerPC.cpp \
++                                        $(COREDIR)/Core/PowerPC/PPCAnalyst.cpp \
++                                        $(COREDIR)/Core/PowerPC/PPCCache.cpp \
++                                        $(COREDIR)/Core/PowerPC/PPCSymbolDB.cpp \
++                                        $(COREDIR)/Core/PowerPC/PPCTables.cpp \
++                                        $(COREDIR)/Core/PowerPC/Profiler.cpp \
++                                        $(COREDIR)/Core/PowerPC/SignatureDB.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitInterface.cpp \
++                                        $(COREDIR)/Core/PowerPC/Interpreter/Interpreter_Branch.cpp \
++                                        $(COREDIR)/Core/PowerPC/Interpreter/Interpreter.cpp \
++                                        $(COREDIR)/Core/PowerPC/Interpreter/Interpreter_FloatingPoint.cpp \
++                                        $(COREDIR)/Core/PowerPC/Interpreter/Interpreter_Integer.cpp \
++                                        $(COREDIR)/Core/PowerPC/Interpreter/Interpreter_LoadStore.cpp \
++                                        $(COREDIR)/Core/PowerPC/Interpreter/Interpreter_LoadStorePaired.cpp \
++                                        $(COREDIR)/Core/PowerPC/Interpreter/Interpreter_Paired.cpp \
++                                        $(COREDIR)/Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp \
++                                        $(COREDIR)/Core/PowerPC/Interpreter/Interpreter_Tables.cpp
++
++SOURCES_CXX += $(COREDIR)/Core/PowerPC/JitCommon/JitAsmCommon.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitCommon/JitBase.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitCommon/JitCache.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitILCommon/IR.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_Branch.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_LoadStore.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_SystemRegisters.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_LoadStoreFloating.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_LoadStorePaired.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_Paired.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_FloatingPoint.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_Integer.cpp
++
++ifeq ($(WITH_DYNAREC), x86_64)
++SOURCES_CXX += $(COREDIR)/Core/PowerPC/Jit64IL/IR_X86.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64IL/JitIL.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64IL/JitIL_Tables.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/Jit64_Tables.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/JitAsm.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/Jit_Branch.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/Jit.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/Jit_FloatingPoint.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/Jit_Integer.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/Jit_LoadStore.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/Jit_LoadStoreFloating.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/Jit_LoadStorePaired.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/Jit_Paired.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/JitRegCache.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64/Jit_SystemRegisters.cpp \
++                                        $(COREDIR)/Core/PowerPC/Jit64Common/Jit64AsmCommon.cpp
++endif
++
++SOURCES_CXX += $(COREDIR)/Core/PowerPC/JitCommon/JitBackpatch.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitCommon/Jit_Util.cpp \
++                                        $(COREDIR)/Core/PowerPC/JitCommon/TrampolineCache.cpp
+ 
+ # Target core
+ SOURCES_CXX += $(COREDIR)/Core/ActionReplay.cpp \
+@@ -500,60 +553,6 @@
+ 
+ SOURCES_CXX += $(COREDIR)/Core/HW/WiimoteReal/WiimoteReal.cpp 
+ 
+-SOURCES_CXX += $(COREDIR)/Core/PowerPC/PowerPC.cpp \
+-					$(COREDIR)/Core/PowerPC/PPCAnalyst.cpp \
+-					$(COREDIR)/Core/PowerPC/PPCCache.cpp \
+-					$(COREDIR)/Core/PowerPC/PPCSymbolDB.cpp \
+-					$(COREDIR)/Core/PowerPC/PPCTables.cpp \
+-					$(COREDIR)/Core/PowerPC/Profiler.cpp \
+-					$(COREDIR)/Core/PowerPC/SignatureDB.cpp \
+-					$(COREDIR)/Core/PowerPC/JitInterface.cpp \
+-					$(COREDIR)/Core/PowerPC/Interpreter/Interpreter_Branch.cpp \
+-					$(COREDIR)/Core/PowerPC/Interpreter/Interpreter.cpp \
+-					$(COREDIR)/Core/PowerPC/Interpreter/Interpreter_FloatingPoint.cpp \
+-					$(COREDIR)/Core/PowerPC/Interpreter/Interpreter_Integer.cpp \
+-					$(COREDIR)/Core/PowerPC/Interpreter/Interpreter_LoadStore.cpp \
+-					$(COREDIR)/Core/PowerPC/Interpreter/Interpreter_LoadStorePaired.cpp \
+-					$(COREDIR)/Core/PowerPC/Interpreter/Interpreter_Paired.cpp \
+-					$(COREDIR)/Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp \
+-					$(COREDIR)/Core/PowerPC/Interpreter/Interpreter_Tables.cpp
+-
+-SOURCES_CXX += $(COREDIR)/Core/PowerPC/JitCommon/JitAsmCommon.cpp \
+-					$(COREDIR)/Core/PowerPC/JitCommon/JitBase.cpp \
+-					$(COREDIR)/Core/PowerPC/JitCommon/JitCache.cpp \
+-					$(COREDIR)/Core/PowerPC/JitILCommon/IR.cpp \
+-					$(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_Branch.cpp \
+-					$(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_LoadStore.cpp \
+-					$(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_SystemRegisters.cpp \
+-					$(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_LoadStoreFloating.cpp \
+-					$(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_LoadStorePaired.cpp \
+-					$(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_Paired.cpp \
+-					$(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_FloatingPoint.cpp \
+-					$(COREDIR)/Core/PowerPC/JitILCommon/JitILBase_Integer.cpp
+-
+-ifeq ($(WITH_DYNAREC), x86_64)
+-SOURCES_CXX += $(COREDIR)/Core/PowerPC/Jit64IL/IR_X86.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64IL/JitIL.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64IL/JitIL_Tables.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/Jit64_Tables.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/JitAsm.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/Jit_Branch.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/Jit.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/Jit_FloatingPoint.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/Jit_Integer.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/Jit_LoadStore.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/Jit_LoadStoreFloating.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/Jit_LoadStorePaired.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/Jit_Paired.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/JitRegCache.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64/Jit_SystemRegisters.cpp \
+-					$(COREDIR)/Core/PowerPC/Jit64Common/Jit64AsmCommon.cpp
+-endif
+-
+-SOURCES_CXX += $(COREDIR)/Core/PowerPC/JitCommon/JitBackpatch.cpp \
+-					$(COREDIR)/Core/PowerPC/JitCommon/Jit_Util.cpp \
+-					$(COREDIR)/Core/PowerPC/JitCommon/TrampolineCache.cpp
+-
+ #libusb 
+ #SOURCES_CXX += $(COREDIR)/Core/IPC_HLE/WII_IPC_HLE_Device_hid.cpp \
+ 					 $(COREDIR)/Core/HW/SI_GCAdapter.cpp

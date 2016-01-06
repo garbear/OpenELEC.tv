@@ -1,0 +1,11 @@
+diff -Naur a/libretro/Makefile.common b/libretro/Makefile.common
+--- a/libretro/Makefile.common	2016-01-07 01:05:03.583054684 +0100
++++ b/libretro/Makefile.common	2016-01-07 01:15:52.017999580 +0100
+@@ -453,7 +453,6 @@
+ 					$(COREDIR)/Core/HW/GPFifo.cpp \
+ 					$(COREDIR)/Core/HW/HW.cpp \
+ 					$(COREDIR)/Core/HW/Memmap.cpp \
+-					$(COREDIR)/Core/HW/MemmapFunctions.cpp \
+ 					$(COREDIR)/Core/HW/MemoryInterface.cpp \
+ 					$(COREDIR)/Core/HW/MMIO.cpp \
+ 					$(COREDIR)/Core/HW/ProcessorInterface.cpp \

@@ -1,0 +1,239 @@
+diff -Naur a/Source/Core/Core/Core.cpp b/Source/Core/Core/Core.cpp
+--- a/Source/Core/Core/Core.cpp	2016-01-06 23:08:16.000000000 +0100
++++ b/Source/Core/Core/Core.cpp	2016-01-07 01:12:04.315682724 +0100
+@@ -392,217 +392,6 @@
+ 	DisplayMessage(cpu_info.Summarize(), 8000);
+ 	DisplayMessage(core_parameter.m_strFilename, 3000);
+ 
+-	// For a time this acts as the CPU thread...
+-	DeclareAsCPUThread();
+-
+-	Movie::Init();
+-
+-	HW::Init();
+-
+-	if (!g_video_backend->Initialize(s_window_handle))
+-	{
+-		PanicAlert("Failed to initialize video backend!");
+-		Host_Message(WM_USER_STOP);
+-		return;
+-	}
+-
+-	OSD::AddMessage("Dolphin " + g_video_backend->GetName() + " Video Backend.", 5000);
+-
+-	if (cpu_info.HTT)
+-		SConfig::GetInstance().m_LocalCoreStartupParameter.bDSPThread = cpu_info.num_cores > 4;
+-	else
+-		SConfig::GetInstance().m_LocalCoreStartupParameter.bDSPThread = cpu_info.num_cores > 2;
+-
+-	if (!DSP::GetDSPEmulator()->Initialize(core_parameter.bWii, core_parameter.bDSPThread))
+-	{
+-		HW::Shutdown();
+-		g_video_backend->Shutdown();
+-		PanicAlert("Failed to initialize DSP emulator!");
+-		Host_Message(WM_USER_STOP);
+-		return;
+-	}
+-
+-	bool init_controllers = false;
+-	if (!g_controller_interface.IsInit())
+-	{
+-		Pad::Initialize(s_window_handle);
+-		Keyboard::Initialize(s_window_handle);
+-		init_controllers = true;
+-	}
+-	else
+-	{
+-		// Update references in case controllers were refreshed
+-		Pad::LoadConfig();
+-		Keyboard::LoadConfig();
+-	}
+-
+-	// Load and Init Wiimotes - only if we are booting in Wii mode
+-	if (core_parameter.bWii)
+-	{
+-		if (init_controllers)
+-			Wiimote::Initialize(s_window_handle, !s_state_filename.empty());
+-		else
+-			Wiimote::LoadConfig();
+-
+-		// Activate Wiimotes which don't have source set to "None"
+-		for (unsigned int i = 0; i != MAX_BBMOTES; ++i)
+-			if (g_wiimote_sources[i])
+-				GetUsbPointer()->AccessWiiMote(i | 0x100)->Activate(true);
+-
+-	}
+-
+-	AudioCommon::InitSoundStream();
+-
+-	// The hardware is initialized.
+-	s_hardware_initialized = true;
+-
+-	// Boot to pause or not
+-	Core::SetState(core_parameter.bBootToPause ? Core::CORE_PAUSE : Core::CORE_RUN);
+-
+-	// Load GCM/DOL/ELF whatever ... we boot with the interpreter core
+-	PowerPC::SetMode(PowerPC::MODE_INTERPRETER);
+-
+-	CBoot::BootUp();
+-
+-	// Thread is no longer acting as CPU Thread
+-	UndeclareAsCPUThread();
+-
+-	// Setup our core, but can't use dynarec if we are compare server
+-	if (core_parameter.iCPUCore != PowerPC::CORE_INTERPRETER
+-	    && (!core_parameter.bRunCompareServer || core_parameter.bRunCompareClient))
+-	{
+-		PowerPC::SetMode(PowerPC::MODE_JIT);
+-	}
+-	else
+-	{
+-		PowerPC::SetMode(PowerPC::MODE_INTERPRETER);
+-	}
+-
+-	// Update the window again because all stuff is initialized
+-	Host_UpdateDisasmDialog();
+-	Host_UpdateMainFrame();
+-
+-	// Determine the CPU thread function
+-	void (*cpuThreadFunc)(void);
+-	if (core_parameter.m_BootType == SCoreStartupParameter::BOOT_DFF)
+-		cpuThreadFunc = FifoPlayerThread;
+-	else
+-		cpuThreadFunc = CpuThread;
+-
+-	// ENTER THE VIDEO THREAD LOOP
+-	if (core_parameter.bCPUThread)
+-	{
+-		// This thread, after creating the EmuWindow, spawns a CPU
+-		// thread, and then takes over and becomes the video thread
+-		Common::SetCurrentThreadName("Video thread");
+-
+-		g_video_backend->Video_Prepare();
+-
+-		// Spawn the CPU thread
+-		s_cpu_thread = std::thread(cpuThreadFunc);
+-
+-		// become the GPU thread
+-		g_video_backend->Video_EnterLoop();
+-
+-		// We have now exited the Video Loop
+-		INFO_LOG(CONSOLE, "%s", StopMessage(false, "Video Loop Ended").c_str());
+-	}
+-	else // SingleCore mode
+-	{
+-		// The spawned CPU Thread also does the graphics.
+-		// The EmuThread is thus an idle thread, which sleeps while
+-		// waiting for the program to terminate. Without this extra
+-		// thread, the video backend window hangs in single core mode
+-		// because no one is pumping messages.
+-		Common::SetCurrentThreadName("Emuthread - Idle");
+-
+-		// Spawn the CPU+GPU thread
+-		s_cpu_thread = std::thread(cpuThreadFunc);
+-
+-		while (PowerPC::GetState() != PowerPC::CPU_POWERDOWN)
+-		{
+-			g_video_backend->PeekMessages();
+-			Common::SleepCurrentThread(20);
+-		}
+-	}
+-
+-	INFO_LOG(CONSOLE, "%s", StopMessage(true, "Stopping Emu thread ...").c_str());
+-
+-	// Wait for s_cpu_thread to exit
+-	INFO_LOG(CONSOLE, "%s", StopMessage(true, "Stopping CPU-GPU thread ...").c_str());
+-
+-	#ifdef USE_GDBSTUB
+-	INFO_LOG(CONSOLE, "%s", StopMessage(true, "Stopping GDB ...").c_str());
+-	gdb_deinit();
+-	INFO_LOG(CONSOLE, "%s", StopMessage(true, "GDB stopped.").c_str());
+-	#endif
+-
+-	s_cpu_thread.join();
+-
+-	INFO_LOG(CONSOLE, "%s", StopMessage(true, "CPU thread stopped.").c_str());
+-
+-	if (core_parameter.bCPUThread)
+-		g_video_backend->Video_Cleanup();
+-
+-	VolumeHandler::EjectVolume();
+-	FileMon::Close();
+-
+-	// Stop audio thread - Actually this does nothing when using HLE
+-	// emulation, but stops the DSP Interpreter when using LLE emulation.
+-	DSP::GetDSPEmulator()->DSP_StopSoundStream();
+-
+-	// We must set up this flag before executing HW::Shutdown()
+-	s_hardware_initialized = false;
+-	INFO_LOG(CONSOLE, "%s", StopMessage(false, "Shutting down HW").c_str());
+-	HW::Shutdown();
+-	INFO_LOG(CONSOLE, "%s", StopMessage(false, "HW shutdown").c_str());
+-
+-	if (init_controllers)
+-	{
+-		Wiimote::Shutdown();
+-		Keyboard::Shutdown();
+-		Pad::Shutdown();
+-		init_controllers = false;
+-	}
+-
+-	g_video_backend->Shutdown();
+-	AudioCommon::ShutdownSoundStream();
+-
+-	INFO_LOG(CONSOLE, "%s", StopMessage(true, "Main Emu thread stopped").c_str());
+-
+-	// Clear on screen messages that haven't expired
+-	g_video_backend->Video_ClearMessages();
+-
+-	// Reload sysconf file in order to see changes committed during emulation
+-	if (core_parameter.bWii)
+-		SConfig::GetInstance().m_SYSCONF->Reload();
+-
+-	INFO_LOG(CONSOLE, "Stop [Video Thread]\t\t---- Shutdown complete ----");
+-	Movie::Shutdown();
+-	PatchEngine::Shutdown();
+-
+-	s_is_stopping = false;
+-
+-	if (s_on_stopped_callback)
+-		s_on_stopped_callback();
+-}
+-
+-// Initialize and create emulation thread
+-// Call browser: Init():s_emu_thread().
+-// See the BootManager.cpp file description for a complete call schedule.
+-void EmuThread()
+-{
+-	const SCoreStartupParameter& core_parameter =
+-		SConfig::GetInstance().m_LocalCoreStartupParameter;
+-
+-	Common::SetCurrentThreadName("Emuthread - Starting");
+-
+-	if (SConfig::GetInstance().m_OCEnable)
+-		DisplayMessage("WARNING: running at non-native CPU clock! Game may not be stable.", 8000);
+-	DisplayMessage(cpu_info.brand_string, 8000);
+-	DisplayMessage(cpu_info.Summarize(), 8000);
+-	DisplayMessage(core_parameter.m_strFilename, 3000);
+-
+ 	Movie::Init();
+ 
+ 	HW::Init();
+@@ -662,17 +451,6 @@
+ 
+ 	CBoot::BootUp();
+ 
+-	// Setup our core, but can't use dynarec if we are compare server
+-	if (core_parameter.iCPUCore != SCoreStartupParameter::CORE_INTERPRETER
+-	    && (!core_parameter.bRunCompareServer || core_parameter.bRunCompareClient))
+-	{
+-		PowerPC::SetMode(PowerPC::MODE_JIT);
+-	}
+-	else
+-	{
+-		PowerPC::SetMode(PowerPC::MODE_INTERPRETER);
+-	}
+-
+ 	// Update the window again because all stuff is initialized
+ 	Host_UpdateDisasmDialog();
+ 	Host_UpdateMainFrame();
