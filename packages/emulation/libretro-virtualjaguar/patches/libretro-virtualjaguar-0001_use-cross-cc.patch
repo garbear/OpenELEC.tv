@@ -1,0 +1,12 @@
+diff -Naur a/Makefile b/Makefile
+--- a/Makefile	2016-01-07 21:04:46.000000000 +0100
++++ b/Makefile	2016-01-07 21:35:25.308713101 +0100
+@@ -37,7 +37,7 @@
+ 	TARGET := $(TARGET_NAME)_libretro.so
+ 	fpic := -fPIC
+ 	SHARED := -shared -Wl,--no-undefined -Wl,--version-script=link.T
+-	CC = gcc
++	CC ?= gcc
+ 
+ # OSX
+ else ifeq ($(platform), osx)
